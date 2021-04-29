@@ -202,7 +202,7 @@ class LabeledRationalFunction<T : Ring<T>>
     override fun toString(): String =
         when (true) {
             numerator.isZero() -> "0"
-            denominator.isOne() -> numerator.toString()
+            denominator.isConstant() -> numerator.toString()
             else ->
                 (if (numerator.coefficients.count() <= 1) numerator.toString() else "($numerator)") +
                         " / " +

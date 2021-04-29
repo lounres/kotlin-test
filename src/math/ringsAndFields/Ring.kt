@@ -1,7 +1,7 @@
 package math.ringsAndFields
 
 /**
- * Interface for mathematical commutative associative rings with additive identity and additive inversion.
+ * Interface for mathematical commutative associative rings with additive and multiplicative identities and additive inversion.
  * Classes which inherit from this interface have defined addiction, subtraction and multiplication operations and additive and multiplicative identities.
  *
  * @param T Any class that is supposed to be the ring. It is supposed to use such inheritance as:

@@ -165,7 +165,9 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) : Ring<Univar
             power(arg.denominator, degree)
         )
 
-    override fun toString(): String =
+    override fun toString(): String = toString(variableName)
+
+    fun toString(withVariableName: String = variableName): String =
         coefficients
             .asSequence()
             .withIndex()
@@ -174,21 +176,21 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) : Ring<Univar
                 when (index) {
                     0 -> "$t"
                     1 -> when {
-                        t.isOne() -> variableName
-                        t == -t.getOne() -> "-$variableName"
-                        else -> "$t $variableName"
+                        t.isOne() -> withVariableName
+                        t == -t.getOne() -> "-$withVariableName"
+                        else -> "$t $withVariableName"
                     }
                     else -> when {
-                        t.isOne() -> "$variableName^$index"
-                        t == -t.getOne() -> "-$variableName^$index"
-                        else -> "$t $variableName^$index"
+                        t.isOne() -> "$withVariableName^$index"
+                        t == -t.getOne() -> "-$withVariableName^$index"
+                        else -> "$t $withVariableName^$index"
                     }
                 }
             }
             .joinToString(separator = " + ") { it }
             .run { ifEmpty { "0" } }
 
-    fun toReversedString(): String =
+    fun toReversedString(withVariableName: String = variableName): String =
         coefficients
             .asSequence()
             .withIndex()
@@ -200,19 +202,25 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) : Ring<Univar
                 when (index) {
                     0 -> "$t"
                     1 -> when {
-                        t.isOne() -> variableName
-                        t == -t.getOne() -> "-$variableName"
-                        else -> "$t $variableName"
+                        t.isOne() -> withVariableName
+                        t == -t.getOne() -> "-$withVariableName"
+                        else -> "$t $withVariableName"
                     }
                     else -> when {
-                        t.isOne() -> "$variableName^$index"
-                        t == -t.getOne() -> "-$variableName^$index"
-                        else -> "$t $variableName^$index"
+                        t.isOne() -> "$withVariableName^$index"
+                        t == -t.getOne() -> "-$withVariableName^$index"
+                        else -> "$t $withVariableName^$index"
                     }
                 }
             }
             .joinToString(separator = " + ") { it }
             .run { ifEmpty { "0" } }
+
+    fun toStringWithBrackets(withVariableName: String = variableName): String =
+        with(toString(withVariableName)) { if (coefficients.count { it.isNotZero() } <= 1) this else "($this)" }
+
+    fun toReversedStringWithBrackets(withVariableName: String = variableName): String =
+        with(toReversedString(withVariableName)) { if (coefficients.count { it.isNotZero() } == 1) this else "($this)" }
 
     fun removeZeros() =
         if (degree > -1) UnivariatePolynomial(coefficients.subList(0, degree + 1)) else getZero()

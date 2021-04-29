@@ -53,6 +53,8 @@ internal constructor(
     val coefficients: Map<Map<Variable, Int>, T>
     /**
      * Signaling if the instance is zero polynomial and as consequence if it is special case.
+     *
+     * To check for equality to the zero polynomial use [isZero].
      */
     private val isZero: Boolean
 
@@ -193,13 +195,54 @@ internal constructor(
      */
     constructor(vararg pairs: Pair<Map<Variable, Int>, T>) : this(*pairs, toCheckInput = true)
 
+    /**
+     * Returns the zero polynomial (additive identity) over considered ring.
+     */
     override fun getZero(): LabeledPolynomial<T> = LabeledPolynomial(emptyMap<Variable, Int>() to ringZero, toCheckInput = false)
+    /**
+     * Returns the unit polynomial (multiplicative identity) over considered ring.
+     */
     override fun getOne(): LabeledPolynomial<T> = LabeledPolynomial(emptyMap<Variable, Int>() to ringOne, toCheckInput = false)
+    /**
+     * Checks if the instant is the zero polynomial (additive identity) over considered ring.
+     */
     override fun isZero(): Boolean = isZero
-    override fun isOne(): Boolean = !isZero && coefficients.keys.all { it.isEmpty() }
+    /**
+     * Checks if the instant is the unit polynomial (multiplicative identity) over considered ring.
+     */
+    override fun isOne(): Boolean =
+        coefficients.size == 1 &&
+                coefficients.entries.first().let { (key, value) -> key.isEmpty() && value.isOne() }
 
+    /**
+     * Checks if the instant is constant polynomial (of degree no more than 0) over considered ring.
+     */
+    fun isConstant(): Boolean =
+        coefficients.size == 1 &&
+                coefficients.entries.first().let { (key, _) -> key.isEmpty() }
+    /**
+     * Checks if the instant is **not** constant polynomial (of degree no more than 0) over considered ring.
+     */
+    fun isNotConstant(): Boolean = !isConstant()
+    /**
+     * Checks if the instant is constant non-zero polynomial (of degree no more than 0) over considered ring.
+     */
+    fun isNonZeroConstant(): Boolean =
+        coefficients.size == 1 &&
+                coefficients.entries.first().let { (key, value) -> key.isEmpty() && value.isNotZero() }
+    /**
+     * Checks if the instant is **not** constant non-zero polynomial (of degree no more than 0) over considered ring.
+     */
+    fun isNotNonZeroConstant(): Boolean = !isNonZeroConstant()
+
+    /**
+     * Returns the same polynomial.
+     */
     override operator fun unaryPlus(): LabeledPolynomial<T> = this
 
+    /**
+     * Returns negation of the polynomial.
+     */
     override operator fun unaryMinus(): LabeledPolynomial<T> =
         LabeledPolynomial(
             coefficients
@@ -207,6 +250,9 @@ internal constructor(
             toCheckInput = false
         )
 
+    /**
+     * Return sum of the polynomials.
+     */
     override operator fun plus(other: LabeledPolynomial<T>): LabeledPolynomial<T> =
         LabeledPolynomial(
             coefficients
@@ -220,6 +266,9 @@ internal constructor(
             toCheckInput = false
         )
 
+    /**
+     * Return sum of the polynomials. [other] is interpreted as [LabeledPolynomial].
+     */
     operator fun plus(other: T): LabeledPolynomial<T> =
         if (other.isZero()) this
         else
@@ -242,6 +291,84 @@ internal constructor(
                 toCheckInput = false
             )
 
+    /**
+     * Return sum of the polynomials. [other] is interpreted as [LabeledPolynomial].
+     */
+    override operator fun plus(other: Integer): LabeledPolynomial<T> =
+        if (other.isZero()) this
+        else
+            LabeledPolynomial(
+                coefficients
+                    .toMutableMap()
+                    .apply {
+                        val key = emptyMap<Variable, Int>()
+                        if (key in this) {
+                            val res = this[key]!! + other
+                            if (res.isZero() && size == 1) {
+                                this[key] = res
+                            } else {
+                                this.remove(key)
+                            }
+                        } else {
+                            this[key] = ringOne * other
+                        }
+                    },
+                toCheckInput = false
+            )
+
+    /**
+     * Return sum of the polynomials. [other] is interpreted as [LabeledPolynomial].
+     */
+    override operator fun plus(other: Int): LabeledPolynomial<T> =
+        if (other == 0) this
+        else
+            LabeledPolynomial(
+                coefficients
+                    .toMutableMap()
+                    .apply {
+                        val key = emptyMap<Variable, Int>()
+                        if (key in this) {
+                            val res = this[key]!! + other
+                            if (res.isZero() && size == 1) {
+                                this[key] = res
+                            } else {
+                                this.remove(key)
+                            }
+                        } else {
+                            this[key] = ringOne * other
+                        }
+                    },
+                toCheckInput = false
+            )
+
+    /**
+     * Return sum of the polynomials. [other] is interpreted as [LabeledPolynomial].
+     */
+    override operator fun plus(other: Long): LabeledPolynomial<T> =
+        if (other == 0L) this
+        else
+            LabeledPolynomial(
+                coefficients
+                    .toMutableMap()
+                    .apply {
+                        val key = emptyMap<Variable, Int>()
+                        if (key in this) {
+                            val res = this[key]!! + other
+                            if (res.isZero() && size == 1) {
+                                this[key] = res
+                            } else {
+                                this.remove(key)
+                            }
+                        } else {
+                            this[key] = ringOne * other
+                        }
+                    },
+                toCheckInput = false
+            )
+
+    /**
+     * Return difference of the polynomials.
+     */
     override operator fun minus(other: LabeledPolynomial<T>): LabeledPolynomial<T> =
         LabeledPolynomial(
             coefficients
@@ -255,6 +382,9 @@ internal constructor(
             toCheckInput = false
         )
 
+    /**
+     * Return difference of the polynomials. [other] is interpreted as [LabeledPolynomial].
+     */
     operator fun minus(other: T): LabeledPolynomial<T> =
         if (other.isZero()) this
         else
@@ -272,6 +402,81 @@ internal constructor(
                             }
                         } else {
                             this[key] = -other
+                        }
+                    },
+                toCheckInput = false
+            )
+
+    /**
+     * Return difference of the polynomials. [other] is interpreted as [LabeledPolynomial].
+     */
+    override operator fun minus(other: Integer): LabeledPolynomial<T> =
+        if (other.isZero()) this
+        else
+            LabeledPolynomial(
+                coefficients
+                    .toMutableMap()
+                    .apply {
+                        val key = emptyMap<Variable, Int>()
+                        if (key in this) {
+                            val res = this[key]!! - other
+                            if (res.isZero() && size == 1) {
+                                this[key] = res
+                            } else {
+                                this.remove(key)
+                            }
+                        } else {
+                            this[key] = -ringOne * other
+                        }
+                    },
+                toCheckInput = false
+            )
+
+    /**
+     * Return difference of the polynomials. [other] is interpreted as [LabeledPolynomial].
+     */
+    override operator fun minus(other: Int): LabeledPolynomial<T> =
+        if (other == 0) this
+        else
+            LabeledPolynomial(
+                coefficients
+                    .toMutableMap()
+                    .apply {
+                        val key = emptyMap<Variable, Int>()
+                        if (key in this) {
+                            val res = this[key]!! - other
+                            if (res.isZero() && size == 1) {
+                                this[key] = res
+                            } else {
+                                this.remove(key)
+                            }
+                        } else {
+                            this[key] = -ringOne * other
+                        }
+                    },
+                toCheckInput = false
+            )
+
+    /**
+     * Return difference of the polynomials. [other] is interpreted as [LabeledPolynomial].
+     */
+    override operator fun minus(other: Long): LabeledPolynomial<T> =
+        if (other == 0L) this
+        else
+            LabeledPolynomial(
+                coefficients
+                    .toMutableMap()
+                    .apply {
+                        val key = emptyMap<Variable, Int>()
+                        if (key in this) {
+                            val res = this[key]!! - other
+                            if (res.isZero() && size == 1) {
+                                this[key] = res
+                            } else {
+                                this.remove(key)
+                            }
+                        } else {
+                            this[key] = -ringOne * other
                         }
                     },
                 toCheckInput = false
@@ -312,7 +517,7 @@ internal constructor(
             LabeledPolynomial(
                 coefficients
                     .mapValues { it.value * other },
-                toCheckInput = false
+                toCheckInput = true
             )
 
     override operator fun times(other: Int): LabeledPolynomial<T> =
@@ -403,9 +608,11 @@ internal constructor(
                 .fold(getOne()) { acc, polynomial ->  acc * polynomial }
         )
 
-    override fun toString(): String =
-        coefficients
-            .toSortedMap(monomialComparator)
+    override fun toString(): String = toString(emptyMap())
+
+    fun toString(names: Map<Variable, String>): String =
+        coefficients.entries
+            .sortedWith { o1, o2 -> monomialComparator.compare(o1.key, o2.key) }
             .asSequence()
             .map { (degs, t) ->
                 if (degs.isEmpty()) "$t"
@@ -419,9 +626,10 @@ internal constructor(
                                 .toSortedMap()
                                 .filter { it.value > 0 }
                                 .map { (variable, deg) ->
+                                    val variableName = names.getOrDefault(variable, variable.toString())
                                     when (deg) {
-                                        1 -> "$variable"
-                                        else -> "$variable^$deg"
+                                        1 -> variableName
+                                        else -> "$variableName^$deg"
                                     }
                                 }
                                 .joinToString(separator = " ") { it }
@@ -429,6 +637,40 @@ internal constructor(
             }
             .joinToString(separator = " + ") { it }
             .ifEmpty { "0" }
+
+    fun toReversedString(names: Map<Variable, String>): String =
+        coefficients.entries
+            .sortedWith { o1, o2 -> -monomialComparator.compare(o1.key, o2.key) }
+            .asSequence()
+            .map { (degs, t) ->
+                if (degs.isEmpty()) "$t"
+                else {
+                    when {
+                        t.isOne() -> ""
+                        t == -t.getOne() -> "-"
+                        else -> "$t "
+                    } +
+                            degs
+                                .toSortedMap()
+                                .filter { it.value > 0 }
+                                .map { (variable, deg) ->
+                                    val variableName = names.getOrDefault(variable, variable.toString())
+                                    when (deg) {
+                                        1 -> variableName
+                                        else -> "$variableName^$deg"
+                                    }
+                                }
+                                .joinToString(separator = " ") { it }
+                }
+            }
+            .joinToString(separator = " + ") { it }
+            .ifEmpty { "0" }
+
+    fun toStringWithBrackets(names: Map<Variable, String>): String =
+        with(toString(names)) { if (coefficients.count() == 1) this else "($this)" }
+
+    fun toReversedStringWithBrackets(names: Map<Variable, String>): String =
+        with(toReversedString(names)) { if (coefficients.count() == 1) this else "($this)" }
 
     /**
      * Converts the value to [LabeledRationalFunction].

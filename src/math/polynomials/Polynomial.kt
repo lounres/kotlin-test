@@ -253,8 +253,8 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
     override fun toString(): String = toString(variableName)
 
     fun toString(withVariableName: String = variableName): String =
-        coefficients
-            .toSortedMap(variableComparator)
+        coefficients.entries
+            .sortedWith { o1, o2 -> monomialComparator.compare(o1.key, o2.key) }
             .asSequence()
             .map { (degs, t) ->
                 if (degs.isEmpty()) "$t"
@@ -278,6 +278,39 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
             }
             .joinToString(separator = " + ") { it }
             .run { ifEmpty { "0" } }
+
+    fun toReversedString(withVariableName: String = variableName): String =
+        coefficients.entries
+            .sortedWith { o1, o2 -> -monomialComparator.compare(o1.key, o2.key) }
+            .asSequence()
+            .map { (degs, t) ->
+                if (degs.isEmpty()) "$t"
+                else {
+                    when {
+                        t.isOne() -> ""
+                        t == -t.getOne() -> "-"
+                        else -> "$t "
+                    } +
+                            degs
+                                .mapIndexed { index, deg ->
+                                    when (deg) {
+                                        0 -> ""
+                                        1 -> "${withVariableName}_${index+1}"
+                                        else -> "${withVariableName}_${index+1}^$deg"
+                                    }
+                                }
+                                .filter { it.isNotEmpty() }
+                                .joinToString(separator = " ") { it }
+                }
+            }
+            .joinToString(separator = " + ") { it }
+            .run { ifEmpty { "0" } }
+
+    fun toStringWithBrackets(withVariableName: String = variableName): String =
+        with(toString(withVariableName)) { if (coefficients.count() == 1) this else "($this)" }
+
+    fun toReversedStringWithBrackets(withVariableName: String = variableName): String =
+        with(toReversedString(withVariableName)) { if (coefficients.count() == 1) this else "($this)" }
 
     fun toRationalFunction() = RationalFunction(this)
 
@@ -305,7 +338,7 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
 
         internal fun List<Int>.cleanUp() = subList(0, indexOfLast { it != 0 } + 1)
 
-        val variableComparator =
+        val monomialComparator =
             object : Comparator<List<Int>> {
                 override fun compare(o1: List<Int>?, o2: List<Int>?): Int {
                     if (o1 == o2) return 0

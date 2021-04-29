@@ -7,3 +7,10 @@
 *.iml
 out
 gen
+
+src/theTrueHat
+src/problems
+src/utils
+src/input.txt
+src/main.py
+
