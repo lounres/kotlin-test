@@ -5,7 +5,7 @@ import kotlin.math.max
 
 
 /**
- * Represents multivariate polynomials.
+ * Represents multivariate polynomials with labeled variables..
  *
  * @param T Ring in which the polynomial is considered.
  * @param coefs Coefficients of the instants.
@@ -97,7 +97,7 @@ internal constructor(
      * Degree of the polynomial, [see also](https://en.wikipedia.org/wiki/Degree_of_a_polynomial). If the polynomial is
      * zero, degree is -1.
      */
-    val degree by lazy { if (isZero) -1 else coefficients.keys.maxOf { it.values.sum() } }
+    val degree: Int by lazy { if (isZero) -1 else coefficients.keys.maxOf { it.values.sum() } }
     /**
      * Map that associates variables (that appear in the polynomial in positive exponents) with their most exponents
      * in which they are appeared in the polynomial.
@@ -105,7 +105,7 @@ internal constructor(
      * As consequence all values in the map are positive integers. Also if the polynomial is constant, the map is empty.
      * And keys of the map is the same as in [variables].
      */
-    val degrees by lazy { if (isZero) emptyMap<Variable, Int>() else
+    val degrees: Map<Variable, Int> by lazy { if (isZero) emptyMap<Variable, Int>() else
         coefficients.keys.fold(mutableMapOf()) { acc, map ->
             map.mapValuesTo(acc) { (variable, deg) -> max(acc.getOrDefault(variable, 0), deg) }
         }
@@ -113,24 +113,24 @@ internal constructor(
     /**
      * Set of all variables that appear in the polynomial in positive exponents.
      */
-    val variables by lazy { degrees.keys }
+    val variables: Set<Variable> by lazy { degrees.keys }
     /**
      * Count of all variables that appear in the polynomial in positive exponents.
      */
-    val countOfVariables by lazy { variables.size }
+    val countOfVariables: Int by lazy { variables.size }
 
     /**
      * Simple way to access any exemplar of the ring. Used to get [ringZero] and [ringOne] &ndash; zero and one of the ring.
      */
-    internal val ringExemplar get() = coefficients.entries.first().value
+    internal val ringExemplar: T get() = coefficients.entries.first().value
     /**
      * Simple way to access the zero of the ring.
      */
-    internal val ringZero get() = ringExemplar.getZero()
+    internal val ringZero: T get() = ringExemplar.getZero()
     /**
      * Simple way to access the one of the ring.
      */
-    internal val ringOne get() = ringExemplar.getOne()
+    internal val ringOne: T get() = ringExemplar.getOne()
 
     /**
      * Gets the coefficients in format of [coefficients] field and cleans it: removes zero degrees from keys of received
@@ -138,6 +138,8 @@ internal constructor(
      *
      * @param pairs Collection of pairs that represents monomials.
      * @param toCheckInput If it's `true` cleaning of [coefficients] is executed otherwise it is not.
+     *
+     * @throws LabeledPolynomialError If no coefficient received or if any of degrees in any monomial is negative.
      */
     internal constructor(pairs: Collection<Pair<Map<Variable, Int>, T>>, toCheckInput: Boolean) : this(
         if (toCheckInput) {
@@ -171,6 +173,8 @@ internal constructor(
      *
      * @param pairs Collection of pairs that represents monomials.
      * @param toCheckInput If it's `true` cleaning of [coefficients] is executed otherwise it is not.
+     *
+     * @throws LabeledPolynomialError If no coefficient received or if any of degrees in any monomial is negative.
      */
     internal constructor(vararg pairs: Pair<Map<Variable, Int>, T>, toCheckInput: Boolean) : this(pairs.toList(), toCheckInput)
     /**
@@ -178,6 +182,8 @@ internal constructor(
      * map, sums up proportional monomials, removes aero monomials, and if result is zero map adds only element in it.
      *
      * @param coefs Coefficients of the instants.
+     *
+     * @throws LabeledPolynomialError If no coefficient received or if any of degrees in any monomial is negative.
      */
     constructor(coefs: Map<Map<Variable, Int>, T>) : this(coefs, toCheckInput = true)
     /**
@@ -185,6 +191,8 @@ internal constructor(
      * map, sums up proportional monomials, removes aero monomials, and if result is zero map adds only element in it.
      *
      * @param pairs Collection of pairs that represents monomials.
+     *
+     * @throws LabeledPolynomialError If no coefficient received or if any of degrees in any monomial is negative.
      */
     constructor(pairs: List<Pair<Map<Variable, Int>, T>>) : this(pairs, toCheckInput = true)
     /**
@@ -192,6 +200,8 @@ internal constructor(
      * map, sums up proportional monomials, removes aero monomials, and if result is zero map adds only element in it.
      *
      * @param pairs Collection of pairs that represents monomials.
+     *
+     * @throws LabeledPolynomialError If no coefficient received or if any of degrees in any monomial is negative.
      */
     constructor(vararg pairs: Pair<Map<Variable, Int>, T>) : this(*pairs, toCheckInput = true)
 
@@ -251,7 +261,7 @@ internal constructor(
         )
 
     /**
-     * Return sum of the polynomials.
+     * Returns sum of the polynomials.
      */
     override operator fun plus(other: LabeledPolynomial<T>): LabeledPolynomial<T> =
         LabeledPolynomial(
@@ -267,7 +277,7 @@ internal constructor(
         )
 
     /**
-     * Return sum of the polynomials. [other] is interpreted as [LabeledPolynomial].
+     * Returns sum of the polynomials. [other] is interpreted as [LabeledPolynomial].
      */
     operator fun plus(other: T): LabeledPolynomial<T> =
         if (other.isZero()) this
@@ -292,7 +302,7 @@ internal constructor(
             )
 
     /**
-     * Return sum of the polynomials. [other] is interpreted as [LabeledPolynomial].
+     * Returns sum of the polynomials. [other] is interpreted as [LabeledPolynomial].
      */
     override operator fun plus(other: Integer): LabeledPolynomial<T> =
         if (other.isZero()) this
@@ -317,7 +327,7 @@ internal constructor(
             )
 
     /**
-     * Return sum of the polynomials. [other] is interpreted as [LabeledPolynomial].
+     * Returns sum of the polynomials. [other] is interpreted as [LabeledPolynomial].
      */
     override operator fun plus(other: Int): LabeledPolynomial<T> =
         if (other == 0) this
@@ -342,7 +352,7 @@ internal constructor(
             )
 
     /**
-     * Return sum of the polynomials. [other] is interpreted as [LabeledPolynomial].
+     * Returns sum of the polynomials. [other] is interpreted as [LabeledPolynomial].
      */
     override operator fun plus(other: Long): LabeledPolynomial<T> =
         if (other == 0L) this
@@ -367,7 +377,7 @@ internal constructor(
             )
 
     /**
-     * Return difference of the polynomials.
+     * Returns difference of the polynomials.
      */
     override operator fun minus(other: LabeledPolynomial<T>): LabeledPolynomial<T> =
         LabeledPolynomial(
@@ -383,7 +393,7 @@ internal constructor(
         )
 
     /**
-     * Return difference of the polynomials. [other] is interpreted as [LabeledPolynomial].
+     * Returns difference of the polynomials. [other] is interpreted as [LabeledPolynomial].
      */
     operator fun minus(other: T): LabeledPolynomial<T> =
         if (other.isZero()) this
@@ -408,7 +418,7 @@ internal constructor(
             )
 
     /**
-     * Return difference of the polynomials. [other] is interpreted as [LabeledPolynomial].
+     * Returns difference of the polynomials. [other] is interpreted as [LabeledPolynomial].
      */
     override operator fun minus(other: Integer): LabeledPolynomial<T> =
         if (other.isZero()) this
@@ -433,7 +443,7 @@ internal constructor(
             )
 
     /**
-     * Return difference of the polynomials. [other] is interpreted as [LabeledPolynomial].
+     * Returns difference of the polynomials. [other] is interpreted as [LabeledPolynomial].
      */
     override operator fun minus(other: Int): LabeledPolynomial<T> =
         if (other == 0) this
@@ -458,7 +468,7 @@ internal constructor(
             )
 
     /**
-     * Return difference of the polynomials. [other] is interpreted as [LabeledPolynomial].
+     * Returns difference of the polynomials. [other] is interpreted as [LabeledPolynomial].
      */
     override operator fun minus(other: Long): LabeledPolynomial<T> =
         if (other == 0L) this
@@ -482,6 +492,9 @@ internal constructor(
                 toCheckInput = false
             )
 
+    /**
+     * Returns product of the polynomials.
+     */
     override operator fun times(other: LabeledPolynomial<T>): LabeledPolynomial<T> =
         when {
             isZero() -> this
@@ -497,46 +510,68 @@ internal constructor(
                                 this[degs] = if (degs in this) this[degs]!! + c else c
                             }
                         }
-                        .filterValues { it.isNotZero() },
+                        .filterValues { it.isNotZero() }
+                        .ifEmpty { mapOf(emptyMap<Variable, Int>() to ringZero) },
                     toCheckInput = false
                 )
         }
 
+    /**
+     * Returns product of the polynomials. [other] is interpreted as [LabeledPolynomial].
+     */
     operator fun times(other: T): LabeledPolynomial<T> =
         if (other.isZero()) getZero()
         else
             LabeledPolynomial(
                 coefficients
-                    .mapValues { it.value * other },
+                    .mapValues { it.value * other }
+                    .filterValues { it.isNotZero() }
+                    .ifEmpty { mapOf(emptyMap<Variable, Int>() to ringZero) },
                 toCheckInput = false
             )
 
+    /**
+     * Returns product of the polynomials. [other] is interpreted as [LabeledPolynomial].
+     */
     override operator fun times(other: Integer): LabeledPolynomial<T> =
         if ((ringOne * other).isZero()) getZero()
         else
             LabeledPolynomial(
                 coefficients
-                    .mapValues { it.value * other },
-                toCheckInput = true
+                    .mapValues { it.value * other }
+                    .filterValues { it.isNotZero() }
+                    .ifEmpty { mapOf(emptyMap<Variable, Int>() to ringZero) },
+                toCheckInput = false
             )
 
+    /**
+     * Returns product of the polynomials. [other] is interpreted as [LabeledPolynomial].
+     */
     override operator fun times(other: Int): LabeledPolynomial<T> =
         if ((ringOne * other).isZero()) getZero()
         else
             LabeledPolynomial(
                 coefficients
-                    .mapValues { it.value * other },
+                    .mapValues { it.value * other }
+                    .filterValues { it.isNotZero() }
+                    .ifEmpty { mapOf(emptyMap<Variable, Int>() to ringZero) },
                 toCheckInput = false
             )
 
+    /**
+     * Returns product of the polynomials. [other] is interpreted as [LabeledPolynomial].
+     */
     override operator fun times(other: Long): LabeledPolynomial<T> =
         if ((ringOne * other).isZero()) getZero()
         else
             LabeledPolynomial(
                 coefficients
-                    .mapValues { it.value * other },
+                    .mapValues { it.value * other }
+                    .filterValues { it.isNotZero() }
+                    .ifEmpty { mapOf(emptyMap<Variable, Int>() to ringZero) },
                 toCheckInput = false
             )
+
 
     override fun equals(other: Any?): Boolean =
         when {
@@ -566,14 +601,12 @@ internal constructor(
     operator fun invoke(arg: Map<Variable, T>): LabeledPolynomial<T> =
         LabeledPolynomial(
             coefficients
-                .asSequence()
                 .map { (degs, c) ->
                     degs.filterKeys { it !in arg } to
                             degs.entries.asSequence().filter { it.key in arg }.fold(c) { acc, (variable, deg) ->
                                 multiplyByPower(acc, arg[variable]!!, deg)
                             }
                 }
-                .toMap()
         )
 
     /**
@@ -591,7 +624,7 @@ internal constructor(
                     )
                 ) { acc, (index, deg) -> multiplyByPower(acc, arg[index]!!, deg) }
             }
-            .reduce { acc, polynomial -> acc + polynomial }
+            .reduce { acc, polynomial -> acc + polynomial } // TODO: Rewrite. Might be slow.
 
     /**
      * Returns polynomial that is got as result of substitution of values of [arg] instead of corresponding keys. All
@@ -608,8 +641,15 @@ internal constructor(
                 .fold(getOne()) { acc, polynomial ->  acc * polynomial }
         )
 
+    /**
+     * Represents the polynomial as a [String]. Consider that monomials are sorted in lexicographic order.
+     */
     override fun toString(): String = toString(emptyMap())
 
+    /**
+     * Represents the polynomial as a [String] with names of variables substituted with names from [names].
+     * Consider that monomials are sorted in lexicographic order.
+     */
     fun toString(names: Map<Variable, String>): String =
         coefficients.entries
             .sortedWith { o1, o2 -> monomialComparator.compare(o1.key, o2.key) }
@@ -638,6 +678,57 @@ internal constructor(
             .joinToString(separator = " + ") { it }
             .ifEmpty { "0" }
 
+    /**
+     * Represents the polynomial as a [String] naming variables by [namer].
+     * Consider that monomials are sorted in lexicographic order.
+     */
+    fun toString(namer: (Variable) -> String): String =
+        coefficients.entries
+            .sortedWith { o1, o2 -> monomialComparator.compare(o1.key, o2.key) }
+            .asSequence()
+            .map { (degs, t) ->
+                if (degs.isEmpty()) "$t"
+                else {
+                    when {
+                        t.isOne() -> ""
+                        t == -t.getOne() -> "-"
+                        else -> "$t "
+                    } +
+                            degs
+                                .toSortedMap()
+                                .filter { it.value > 0 }
+                                .map { (variable, deg) ->
+                                    when (deg) {
+                                        1 -> namer(variable)
+                                        else -> "${namer(variable)}^$deg"
+                                    }
+                                }
+                                .joinToString(separator = " ") { it }
+                }
+            }
+            .joinToString(separator = " + ") { it }
+            .ifEmpty { "0" }
+
+    /**
+     * Represents the polynomial as a [String] with names of variables substituted with names from [names] and with
+     * brackets around the string if needed (i.e. when there are at least two addends in the representation).
+     * Consider that monomials are sorted in lexicographic order.
+     */
+    fun toStringWithBrackets(names: Map<Variable, String>): String =
+        with(toString(names)) { if (coefficients.count() == 1) this else "($this)" }
+
+    /**
+     * Represents the polynomial as a [String] naming variables by [namer] and with brackets around the string if needed
+     * (i.e. when there are at least two addends in the representation).
+     * Consider that monomials are sorted in lexicographic order.
+     */
+    fun toStringWithBrackets(namer: (Variable) -> String): String =
+        with(toString(namer)) { if (coefficients.count() == 1) this else "($this)" }
+
+    /**
+     * Represents the polynomial as a [String] with names of variables substituted with names from [names].
+     * Consider that monomials are sorted in **reversed** lexicographic order.
+     */
     fun toReversedString(names: Map<Variable, String>): String =
         coefficients.entries
             .sortedWith { o1, o2 -> -monomialComparator.compare(o1.key, o2.key) }
@@ -666,11 +757,52 @@ internal constructor(
             .joinToString(separator = " + ") { it }
             .ifEmpty { "0" }
 
-    fun toStringWithBrackets(names: Map<Variable, String>): String =
-        with(toString(names)) { if (coefficients.count() == 1) this else "($this)" }
+    /**
+     * Represents the polynomial as a [String] naming variables by [namer].
+     * Consider that monomials are sorted in **reversed** lexicographic order.
+     */
+    fun toReversedString(namer: (Variable) -> String): String =
+        coefficients.entries
+            .sortedWith { o1, o2 -> -monomialComparator.compare(o1.key, o2.key) }
+            .asSequence()
+            .map { (degs, t) ->
+                if (degs.isEmpty()) "$t"
+                else {
+                    when {
+                        t.isOne() -> ""
+                        t == -t.getOne() -> "-"
+                        else -> "$t "
+                    } +
+                            degs
+                                .toSortedMap()
+                                .filter { it.value > 0 }
+                                .map { (variable, deg) ->
+                                    when (deg) {
+                                        1 -> namer(variable)
+                                        else -> "${namer(variable)}^$deg"
+                                    }
+                                }
+                                .joinToString(separator = " ") { it }
+                }
+            }
+            .joinToString(separator = " + ") { it }
+            .ifEmpty { "0" }
 
+    /**
+     * Represents the polynomial as a [String] with names of variables substituted with names from [names] and with
+     * brackets around the string if needed (i.e. when there are at least two addends in the representation).
+     * Consider that monomials are sorted in **reversed** lexicographic order.
+     */
     fun toReversedStringWithBrackets(names: Map<Variable, String>): String =
         with(toReversedString(names)) { if (coefficients.count() == 1) this else "($this)" }
+
+    /**
+     * Represents the polynomial as a [String] naming variables by [namer] and with brackets around the string if needed
+     * (i.e. when there are at least two addends in the representation).
+     * Consider that monomials are sorted in **reversed** lexicographic order.
+     */
+    fun toReversedStringWithBrackets(namer: (Variable) -> String): String =
+        with(toReversedString(namer)) { if (coefficients.count() == 1) this else "($this)" }
 
     /**
      * Converts the value to [LabeledRationalFunction].

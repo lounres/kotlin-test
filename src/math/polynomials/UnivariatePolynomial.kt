@@ -13,14 +13,27 @@ import kotlin.math.*
  * @property degree Represents degree of the polynomial.
  * @property ringExemplar Exemplar of the used field [T]. Used to get one and zero in the field or the field class.
  */
-class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) : Ring<UnivariatePolynomial<T>> {
+class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add toCheckInput parameter. */ : Ring<UnivariatePolynomial<T>> {
     init { if (coefficients.isEmpty()) throw UnivariatePolynomialError("UnivariatePolynomial coefficients' list must not be empty") }
 
-    val degree by lazy { coefficients.indexOfLast { it.isNotZero() } }
+    /**
+     * Degree of the polynomial, [see also](https://en.wikipedia.org/wiki/Degree_of_a_polynomial). If the polynomial is
+     * zero, degree is -1.
+     */
+    val degree: Int by lazy { coefficients.indexOfLast { it.isNotZero() } }
 
-    internal val ringExemplar get() = coefficients.first()
-    internal val ringOne get() = ringExemplar.getOne()
-    internal val ringZero get() = ringExemplar.getZero()
+    /**
+     * Simple way to access any exemplar of the ring. Used to get [ringZero] and [ringOne] &ndash; zero and one of the ring.
+     */
+    internal val ringExemplar: T get() = coefficients.first()
+    /**
+     * Simple way to access the zero of the ring.
+     */
+    internal val ringOne: T get() = ringExemplar.getOne()
+    /**
+     * Simple way to access the one of the ring.
+     */
+    internal val ringZero: T get() = ringExemplar.getZero()
 
     constructor(coefficients: List<T>, reverse: Boolean = false) : this(with(coefficients) { if (reverse) reversed() else this })
     constructor(vararg coefficients: T, reverse: Boolean = false) : this(coefficients.toList(), reverse)

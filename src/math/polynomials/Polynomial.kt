@@ -6,6 +6,11 @@ import kotlin.math.max
 
 class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCheckInput: Boolean) : Ring<Polynomial<T>> {
     val coefficients: Map<List<Int>, T>
+    /**
+     * Signaling if the instance is zero polynomial and as consequence if it is special case.
+     *
+     * To check for equality to the zero polynomial use [isZero].
+     */
     private val isZero: Boolean
 
     init {
@@ -39,15 +44,38 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
         }
     }
 
-    val countOfVariables by lazy { if (isZero) 0 else coefficients.keys.maxOf { it.size } }
-    val degree by lazy { if (isZero) -1 else coefficients.keys.maxOf { it.sum() } }
-    val degrees by lazy { if (isZero) emptyList() else coefficients.keys.fold(List(countOfVariables) { 0 }) { acc, list ->
+    /**
+     * Count of all variables that appear in the polynomial in positive exponents.
+     */
+    val countOfVariables: Int by lazy { if (isZero) 0 else coefficients.keys.maxOf { it.size } }
+    /**
+     * Degree of the polynomial, [see also](https://en.wikipedia.org/wiki/Degree_of_a_polynomial). If the polynomial is
+     * zero, degree is -1.
+     */
+    val degree: Int by lazy { if (isZero) -1 else coefficients.keys.maxOf { it.sum() } }
+    /**
+     * List that associates indices of variables (that appear in the polynomial in positive exponents) with their most
+     * exponents in which the variables are appeared in the polynomial.
+     *
+     * As consequence all values in the list are non-negative integers. Also if the polynomial is constant, the list is empty.
+     * And size of the list is [countOfVariables].
+     */
+    val degrees: List<Int> by lazy { if (isZero) emptyList() else coefficients.keys.fold(List(countOfVariables) { 0 }) { acc, list ->
         acc.mapIndexed { index, i -> max(list.getOrElse(index) { 0 }, i) }
     } }
 
-    internal val ringExemplar get() = coefficients.entries.first().value
-    internal val ringOne get() = ringExemplar.getOne()
-    internal val ringZero get() = ringExemplar.getZero()
+    /**
+     * Simple way to access any exemplar of the ring. Used to get [ringZero] and [ringOne] &ndash; zero and one of the ring.
+     */
+    internal val ringExemplar: T get() = coefficients.entries.first().value
+    /**
+     * Simple way to access the zero of the ring.
+     */
+    internal val ringOne: T get() = ringExemplar.getOne()
+    /**
+     * Simple way to access the one of the ring.
+     */
+    internal val ringZero: T get() = ringExemplar.getZero()
 
     internal constructor(vararg pairs: Pair<List<Int>, T>, toCheckInput: Boolean) : this(mapOf(*pairs), toCheckInput)
     constructor(coefs: Map<List<Int>, T>) : this(coefs, true)
@@ -76,7 +104,7 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                         .mapValuesTo(this) { (key, value) -> if (key in this) this[key]!! + value else value }
                 }
                 .filterValues { it.isNotZero() }
-                .run { ifEmpty { mapOf(emptyList<Int>() to ringZero) } },
+                .ifEmpty { mapOf(emptyList<Int>() to ringZero) },
             toCheckInput = false
         )
 
@@ -111,7 +139,7 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                         .mapValuesTo(this) { (key, value) -> if (key in this) this[key]!! - value else -value }
                 }
                 .filterValues { it.isNotZero() }
-                .run { ifEmpty { mapOf(emptyList<Int>() to ringZero) } },
+                .ifEmpty { mapOf(emptyList<Int>() to ringZero) },
             toCheckInput = false
         )
 
@@ -277,7 +305,7 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                 }
             }
             .joinToString(separator = " + ") { it }
-            .run { ifEmpty { "0" } }
+            .ifEmpty { "0" }
 
     fun toReversedString(withVariableName: String = variableName): String =
         coefficients.entries
@@ -304,7 +332,7 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                 }
             }
             .joinToString(separator = " + ") { it }
-            .run { ifEmpty { "0" } }
+            .ifEmpty { "0" }
 
     fun toStringWithBrackets(withVariableName: String = variableName): String =
         with(toString(withVariableName)) { if (coefficients.count() == 1) this else "($this)" }

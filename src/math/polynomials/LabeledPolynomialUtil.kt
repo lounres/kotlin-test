@@ -335,7 +335,7 @@ internal infix fun <T: Ring<T>> LabeledPolynomial<T>.invokeRFTakeNumerator (arg:
                     )
                 }
             }
-            .reduce { acc, polynomial -> acc + polynomial }
+            .reduce { acc, polynomial -> acc + polynomial } // TODO: Rewrite. Might be slow.
     }
 // endregion
 
