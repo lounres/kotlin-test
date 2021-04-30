@@ -4,15 +4,29 @@ import math.ringsAndFields.*
 import kotlin.math.*
 
 
-/**
- * The class represents univariate polynomials.
- *
- * @property coefficients List containing coefficients of the polynomial.
- *     In index `i` coefficient for `x^i` is stored.
- *     **There may be zeros in the end of the list. But must be at least one coefficient.**
- * @property degree Represents degree of the polynomial.
- * @property ringExemplar Exemplar of the used field [T]. Used to get one and zero in the field or the field class.
- */
+///**
+// * The class represents univariate polynomials.
+// *
+// * @property coefficients List containing coefficients of the polynomial.
+// *     In index `i` coefficient for `x^i` is stored.
+// *     **There may be zeros in the end of the list. But must be at least one coefficient.**
+// * @property degree Represents degree of the polynomial.
+// * @property ringExemplar Exemplar of the used field [T]. Used to get one and zero in the field or the field class.
+// */
+///**
+// * Represents univariate polynomials.
+// *
+// * @param T Ring in which the polynomial is considered.
+// * @param coefs Coefficients of the instants.
+// * @param toCheckInput If it's `true` cleaning of [coefficients] is executed otherwise it is not.
+// *
+// * @constructor Gets the coefficients in format of [coefficients] field and cleans it: removes zero degrees from end of
+// * received lists, sums up proportional monomials, removes zero monomials, and if result is empty map adds only element
+// * in it.
+// *
+// * @throws UnivariatePolynomialError If no coefficient received or if any of degrees in any monomial is negative.
+// */
+// TODO: Docs
 class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add toCheckInput parameter. */ : Ring<UnivariatePolynomial<T>> {
     init { if (coefficients.isEmpty()) throw UnivariatePolynomialError("UnivariatePolynomial coefficients' list must not be empty") }
 
@@ -41,7 +55,24 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
     override fun getZero(): UnivariatePolynomial<T> = UnivariatePolynomial(ringZero)
     override fun getOne(): UnivariatePolynomial<T> = UnivariatePolynomial(ringOne)
     override fun isZero(): Boolean = coefficients.all { it.isZero() }
-    override fun isOne(): Boolean = coefficients.indexOfLast { it.isNotZero() } == 0
+    override fun isOne(): Boolean = degree == 0 && coefficients.first().isOne()
+
+    /**
+     * Checks if the instant is constant polynomial (of degree no more than 0) over considered ring.
+     */
+    fun isConstant(): Boolean = degree <= 0
+    /**
+     * Checks if the instant is **not** constant polynomial (of degree no more than 0) over considered ring.
+     */
+    fun isNotConstant(): Boolean = !isConstant()
+    /**
+     * Checks if the instant is constant non-zero polynomial (of degree no more than 0) over considered ring.
+     */
+    fun isNonZeroConstant(): Boolean = degree == 0
+    /**
+     * Checks if the instant is **not** constant non-zero polynomial (of degree no more than 0) over considered ring.
+     */
+    fun isNotNonZeroConstant(): Boolean = !isNonZeroConstant()
 
     override operator fun unaryPlus(): UnivariatePolynomial<T> = this
 
@@ -61,7 +92,7 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
                         else -> coefficients[it] + other.coefficients[it]
                     }
                 }
-                .let { it.ifEmpty { listOf(ringZero) } }
+                .ifEmpty { listOf(ringZero) }
         )
 
     operator fun plus(other: T): UnivariatePolynomial<T> =
@@ -79,7 +110,7 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
                         else -> coefficients[it] - other.coefficients[it]
                     }
                 }
-                .let { it.ifEmpty { listOf(ringZero) } }
+                .ifEmpty { listOf(ringZero) }
         )
 
     operator fun minus(other: T): UnivariatePolynomial<T> =
@@ -201,7 +232,7 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
                 }
             }
             .joinToString(separator = " + ") { it }
-            .run { ifEmpty { "0" } }
+            .ifEmpty { "0" }
 
     fun toStringWithBrackets(withVariableName: String = variableName): String =
         with(toString(withVariableName)) { if (coefficients.count { it.isNotZero() } <= 1) this else "($this)" }
@@ -230,7 +261,7 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
                 }
             }
             .joinToString(separator = " + ") { it }
-            .run { ifEmpty { "0" } }
+            .ifEmpty { "0" }
 
     fun toReversedStringWithBrackets(withVariableName: String = variableName): String =
         with(toReversedString(withVariableName)) { if (coefficients.count { it.isNotZero() } == 1) this else "($this)" }

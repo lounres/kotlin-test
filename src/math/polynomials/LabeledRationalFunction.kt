@@ -204,56 +204,56 @@ class LabeledRationalFunction<T : Ring<T>>
     fun toString(names: Map<Variable, String> = emptyMap()): String =
         when (true) {
             numerator.isZero() -> "0"
-            denominator.isConstant() -> numerator.toString(names)
+            denominator.isOne() -> numerator.toString(names)
             else -> "${numerator.toStringWithBrackets(names)}/${denominator.toStringWithBrackets(names)}"
         }
 
     fun toString(namer: (Variable) -> String): String =
         when (true) {
             numerator.isZero() -> "0"
-            denominator.isConstant() -> numerator.toString(namer)
+            denominator.isOne() -> numerator.toString(namer)
             else -> "${numerator.toStringWithBrackets(namer)}/${denominator.toStringWithBrackets(namer)}"
         }
 
     fun toStringWithBrackets(names: Map<Variable, String> = emptyMap()): String =
         when (true) {
             numerator.isZero() -> "0"
-            denominator.isConstant() -> numerator.toStringWithBrackets(names)
+            denominator.isOne() -> numerator.toStringWithBrackets(names)
             else -> "(${numerator.toStringWithBrackets(names)}/${denominator.toStringWithBrackets(names)})"
         }
 
     fun toStringWithBrackets(namer: (Variable) -> String): String =
         when (true) {
             numerator.isZero() -> "0"
-            denominator.isConstant() -> numerator.toStringWithBrackets(namer)
+            denominator.isOne() -> numerator.toStringWithBrackets(namer)
             else -> "(${numerator.toStringWithBrackets(namer)}/${denominator.toStringWithBrackets(namer)})"
         }
 
     fun toReversedString(names: Map<Variable, String> = emptyMap()): String =
         when (true) {
             numerator.isZero() -> "0"
-            denominator.isConstant() -> numerator.toReversedString(names)
+            denominator.isOne() -> numerator.toReversedString(names)
             else -> "${numerator.toReversedStringWithBrackets(names)}/${denominator.toReversedStringWithBrackets(names)}"
         }
 
     fun toReversedString(namer: (Variable) -> String): String =
         when (true) {
             numerator.isZero() -> "0"
-            denominator.isConstant() -> numerator.toReversedString(namer)
+            denominator.isOne() -> numerator.toReversedString(namer)
             else -> "${numerator.toReversedStringWithBrackets(namer)}/${denominator.toReversedStringWithBrackets(namer)}"
         }
 
     fun toReversedStringWithBrackets(names: Map<Variable, String> = emptyMap()): String =
         when (true) {
             numerator.isZero() -> "0"
-            denominator.isConstant() -> numerator.toReversedStringWithBrackets(names)
+            denominator.isOne() -> numerator.toReversedStringWithBrackets(names)
             else -> "(${numerator.toReversedStringWithBrackets(names)}/${denominator.toReversedStringWithBrackets(names)})"
         }
 
     fun toReversedStringWithBrackets(namer: (Variable) -> String): String =
         when (true) {
             numerator.isZero() -> "0"
-            denominator.isConstant() -> numerator.toReversedStringWithBrackets(namer)
+            denominator.isOne() -> numerator.toReversedStringWithBrackets(namer)
             else -> "(${numerator.toReversedStringWithBrackets(namer)}/${denominator.toReversedStringWithBrackets(namer)})"
         }
 }

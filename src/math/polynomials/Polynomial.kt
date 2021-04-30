@@ -1,12 +1,49 @@
 package math.polynomials
 
-import math.polynomials.LabeledPolynomial.Companion.cleanUp
-import math.polynomials.Polynomial.Companion.cleanUp
 import math.ringsAndFields.*
 import kotlin.math.max
 
 
-class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCheckInput: Boolean) : Ring<Polynomial<T>> {
+/**
+ * Represents multivariate polynomials with indexed variables.
+ *
+ * @param T Ring in which the polynomial is considered.
+ * @param coefs Coefficients of the instants.
+ * @param toCheckInput If it's `true` cleaning of [coefficients] is executed otherwise it is not.
+ *
+ * @constructor Gets the coefficients in format of [coefficients] field and cleans it: removes zero degrees from end of
+ * received lists, sums up proportional monomials, removes zero monomials, and if result is empty map adds only element
+ * in it.
+ *
+ * @throws PolynomialError If no coefficient received or if any of degrees in any monomial is negative.
+ */
+class Polynomial<T: Ring<T>>
+internal constructor(
+    coefs: Map<List<Int>, T>,
+    toCheckInput: Boolean
+) : Ring<Polynomial<T>> {
+    /**
+     * Map that collects coefficients of the polynomial. Every non-zero monomial
+     * `a x_1^{d_1} ... x_n^{d_n}` is represented as pair "key-value" in the map, where value is coefficients `a` and
+     * key is list that associates index of every variable in the monomial with multiplicity of the variable occurring
+     * in the monomial. For example polynomial
+     * ```
+     * 5 x_1^2 x_3^3 - 6 x_2 + 0 x_2 x_3
+     * ```
+     * has coefficients represented as
+     * ```
+     * mapOf(
+     *      listOf(2, 0, 3) to 5,
+     *      listOf(0, 1) to (-6)
+     * )
+     * ```
+     *
+     * There is only one special case: if the polynomial is zero, the list contains only one monomial:
+     * ```
+     * listOf<Int>() to ZERO
+     * ```
+     * where `ZERO` is the ring zero.
+     */
     val coefficients: Map<List<Int>, T>
     /**
      * Signaling if the instance is zero polynomial and as consequence if it is special case.
@@ -79,6 +116,15 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
      */
     internal val ringZero: T get() = ringExemplar.getZero()
 
+    /**
+     * Gets the coefficients in format of [coefficients] field and cleans it: removes zero degrees from end of received
+     * lists, sums up proportional monomials, removes zero monomials, and if result is empty map adds only element in it.
+     *
+     * @param pairs Collection of pairs that represent monomials.
+     * @param toCheckInput If it's `true` cleaning of [coefficients] is executed otherwise it is not.
+     *
+     * @throws PolynomialError If no coefficient received or if any of degrees in any monomial is negative.
+     */
     internal constructor(pairs: Collection<Pair<List<Int>, T>>, toCheckInput: Boolean) : this(
         if (toCheckInput) {
             if (pairs.isEmpty()) throw PolynomialError("Polynomial must contain at least one (maybe zero) monomial")
@@ -101,18 +147,92 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
         } else pairs.toMap(),
         toCheckInput = false
     )
+    /**
+     * Gets the coefficients in format of [coefficients] field and cleans it: removes zero degrees from end of received
+     * lists, sums up proportional monomials, removes zero monomials, and if result is empty map adds only element in it.
+     *
+     * @param pairs Collection of pairs that represent monomials.
+     * @param toCheckInput If it's `true` cleaning of [coefficients] is executed otherwise it is not.
+     *
+     * @throws PolynomialError If no coefficient received or if any of degrees in any monomial is negative.
+     */
     internal constructor(vararg pairs: Pair<List<Int>, T>, toCheckInput: Boolean) : this(pairs.toList(), toCheckInput)
+    /**
+     * Gets the coefficients in format of [coefficients] field and cleans it: removes zero degrees from end of received
+     * lists, sums up proportional monomials, removes zero monomials, and if result is empty map adds only element in it.
+     *
+     * @param coefs Coefficients of the instants.
+     *
+     * @throws PolynomialError If no coefficient received or if any of degrees in any monomial is negative.
+     */
     constructor(coefs: Map<List<Int>, T>) : this(coefs, toCheckInput = true)
+    /**
+     * Gets the coefficients in format of [coefficients] field and cleans it: removes zero degrees from end of received
+     * lists, sums up proportional monomials, removes zero monomials, and if result is empty map adds only element in it.
+     *
+     * @param pairs Collection of pairs that represent monomials.
+     *
+     * @throws PolynomialError If no coefficient received or if any of degrees in any monomial is negative.
+     */
     constructor(pairs: Collection<Pair<List<Int>, T>>) : this(pairs, toCheckInput = true)
+    /**
+     * Gets the coefficients in format of [coefficients] field and cleans it: removes zero degrees from end of received
+     * lists, sums up proportional monomials, removes zero monomials, and if result is empty map adds only element in it.
+     *
+     * @param pairs Collection of pairs that represent monomials.
+     *
+     * @throws PolynomialError If no coefficient received or if any of degrees in any monomial is negative.
+     */
     constructor(vararg pairs: Pair<List<Int>, T>) : this(*pairs, toCheckInput = true)
 
+    /**
+     * Returns the zero polynomial (additive identity) over considered ring.
+     */
     override fun getZero(): Polynomial<T> = Polynomial(emptyList<Int>() to ringZero, toCheckInput = false)
+    /**
+     * Returns the unit polynomial (multiplicative identity) over considered ring.
+     */
     override fun getOne(): Polynomial<T> = Polynomial(emptyList<Int>() to ringOne, toCheckInput = false)
+    /**
+     * Checks if the instant is the zero polynomial (additive identity) over considered ring.
+     */
     override fun isZero(): Boolean = isZero
-    override fun isOne(): Boolean = !isZero && coefficients.keys.all { it.isEmpty() }
+    /**
+     * Checks if the instant is the unit polynomial (multiplicative identity) over considered ring.
+     */
+    override fun isOne(): Boolean =
+        coefficients.size == 1 &&
+                coefficients.entries.first().let { (key, value) -> key.isEmpty() && value.isOne() }
 
+    /**
+     * Checks if the instant is constant polynomial (of degree no more than 0) over considered ring.
+     */
+    fun isConstant(): Boolean =
+        coefficients.size == 1 &&
+                coefficients.entries.first().let { (key, _) -> key.isEmpty() }
+    /**
+     * Checks if the instant is **not** constant polynomial (of degree no more than 0) over considered ring.
+     */
+    fun isNotConstant(): Boolean = !isConstant()
+    /**
+     * Checks if the instant is constant non-zero polynomial (of degree no more than 0) over considered ring.
+     */
+    fun isNonZeroConstant(): Boolean =
+        coefficients.size == 1 &&
+                coefficients.entries.first().let { (key, value) -> key.isEmpty() && value.isNotZero() }
+    /**
+     * Checks if the instant is **not** constant non-zero polynomial (of degree no more than 0) over considered ring.
+     */
+    fun isNotNonZeroConstant(): Boolean = !isNonZeroConstant()
+
+    /**
+     * Returns the same polynomial.
+     */
     override operator fun unaryPlus(): Polynomial<T> = this
 
+    /**
+     * Returns negation of the polynomial.
+     */
     override operator fun unaryMinus(): Polynomial<T> =
         Polynomial(
             coefficients
@@ -120,6 +240,9 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
             toCheckInput = false
         )
 
+    /**
+     * Returns sum of the polynomials.
+     */
     override operator fun plus(other: Polynomial<T>): Polynomial<T> =
         Polynomial(
             coefficients
@@ -133,6 +256,9 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
             toCheckInput = false
         )
 
+    /**
+     * Returns sum of the polynomials. [other] is interpreted as [Polynomial].
+     */
     operator fun plus(other: T): Polynomial<T> =
         if (other.isZero()) this
         else
@@ -155,6 +281,9 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                 toCheckInput = false
             )
 
+    /**
+     * Returns sum of the polynomials. [other] is interpreted as [Polynomial].
+     */
     override operator fun plus(other: Integer): Polynomial<T> =
         if (other.isZero()) this
         else
@@ -177,6 +306,9 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                 toCheckInput = false
             )
 
+    /**
+     * Returns sum of the polynomials. [other] is interpreted as [Polynomial].
+     */
     override operator fun plus(other: Int): Polynomial<T> =
         if (other == 0) this
         else
@@ -199,6 +331,9 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                 toCheckInput = false
             )
 
+    /**
+     * Returns sum of the polynomials. [other] is interpreted as [Polynomial].
+     */
     override operator fun plus(other: Long): Polynomial<T> =
         if (other == 0L) this
         else
@@ -221,6 +356,9 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                 toCheckInput = false
             )
 
+    /**
+     * Returns difference of the polynomials.
+     */
     override operator fun minus(other: Polynomial<T>): Polynomial<T> =
         Polynomial(
             coefficients
@@ -234,6 +372,9 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
             toCheckInput = false
         )
 
+    /**
+     * Returns difference of the polynomials. [other] is interpreted as [Polynomial].
+     */
     operator fun minus(other: T): Polynomial<T> =
         if (other.isZero()) this
         else
@@ -256,6 +397,9 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                 toCheckInput = false
             )
 
+    /**
+     * Returns difference of the polynomials. [other] is interpreted as [Polynomial].
+     */
     override operator fun minus(other: Integer): Polynomial<T> =
         if (other.isZero()) this
         else
@@ -278,6 +422,9 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                 toCheckInput = false
             )
 
+    /**
+     * Returns difference of the polynomials. [other] is interpreted as [Polynomial].
+     */
     override operator fun minus(other: Int): Polynomial<T> =
         if (other == 0) this
         else
@@ -300,6 +447,9 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                 toCheckInput = false
             )
 
+    /**
+     * Returns difference of the polynomials. [other] is interpreted as [Polynomial].
+     */
     override operator fun minus(other: Long): Polynomial<T> =
         if (other == 0L) this
         else
@@ -322,6 +472,9 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                 toCheckInput = false
             )
 
+    /**
+     * Returns product of the polynomials.
+     */
     override operator fun times(other: Polynomial<T>): Polynomial<T> =
         when {
             isZero() -> this
@@ -344,6 +497,9 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                 )
         }
 
+    /**
+     * Returns product of the polynomials. [other] is interpreted as [Polynomial].
+     */
     operator fun times(other: T): Polynomial<T> =
         if (other.isZero()) getZero()
         else
@@ -355,6 +511,9 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                 toCheckInput = false
             )
 
+    /**
+     * Returns product of the polynomials. [other] is interpreted as [Polynomial].
+     */
     override operator fun times(other: Integer): Polynomial<T> =
         if ((ringOne * other).isZero()) getZero()
         else
@@ -366,6 +525,9 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                 toCheckInput = false
             )
 
+    /**
+     * Returns product of the polynomials. [other] is interpreted as [Polynomial].
+     */
     override operator fun times(other: Int): Polynomial<T> =
         if ((ringOne * other).isZero()) getZero()
         else
@@ -377,6 +539,9 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                 toCheckInput = false
             )
 
+    /**
+     * Returns product of the polynomials. [other] is interpreted as [Polynomial].
+     */
     override operator fun times(other: Long): Polynomial<T> =
         if ((ringOne * other).isZero()) getZero()
         else
@@ -388,6 +553,7 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                 toCheckInput = false
             )
 
+    // TODO: Docs
     override fun equals(other: Any?): Boolean =
         when {
             this === other -> true
@@ -407,8 +573,13 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
             }
         }
 
+    // TODO: Docs
     override fun hashCode(): Int = javaClass.hashCode() // TODO: Rewrite
 
+    /**
+     * Returns polynomial that is got as result of substitution of values of [arg] instead of corresponding keys. All
+     * variables of the polynomial that is not in [arg] keys are left unsubstituted.
+     */
     operator fun invoke(arg: Map<Int, T>): Polynomial<T> =
         Polynomial(
             coefficients
@@ -418,6 +589,10 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                 }
         )
 
+    /**
+     * Returns polynomial that is got as result of substitution of values of [arg] instead of corresponding keys. All
+     * variables of the polynomial that is not in [arg] keys are left unsubstituted.
+     */
     @JvmName("invokePolynomial")
     operator fun invoke(arg: Map<Int, Polynomial<T>>): Polynomial<T> =
         coefficients
@@ -431,6 +606,10 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
             }
             .reduce { acc, polynomial -> acc + polynomial } // TODO: Rewrite. Might be slow.
 
+    /**
+     * Returns polynomial that is got as result of substitution of values of [arg] instead of corresponding keys. All
+     * variables of the polynomial that is not in [arg] keys are left unsubstituted.
+     */
     @JvmName("invokeRationalFunction")
     operator fun invoke(arg: Map<Int, RationalFunction<T>>): RationalFunction<T> =
         RationalFunction(
@@ -442,8 +621,15 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                 .fold(getOne()) { acc, polynomial ->  acc * polynomial }
         )
 
+    /**
+     * Represents the polynomial as a [String]. Consider that monomials are sorted in lexicographic order.
+     */
     override fun toString(): String = toString(variableName)
 
+    /**
+     * Represents the polynomial as a [String] where name of variable with index `i` is [withVariableName] + `"_${i+1}"`.
+     * Consider that monomials are sorted in lexicographic order.
+     */
     fun toString(withVariableName: String = variableName): String =
         coefficients.entries
             .sortedWith { o1, o2 -> monomialComparator.compare(o1.key, o2.key) }
@@ -471,6 +657,10 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
             .joinToString(separator = " + ") { it }
             .ifEmpty { "0" }
 
+    /**
+     * Represents the polynomial as a [String] naming variables by [namer].
+     * Consider that monomials are sorted in lexicographic order.
+     */
     fun toString(namer: (Int) -> String): String =
         coefficients.entries
             .sortedWith { o1, o2 -> monomialComparator.compare(o1.key, o2.key) }
@@ -498,12 +688,26 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
             .joinToString(separator = " + ") { it }
             .ifEmpty { "0" }
 
+    /**
+     * Represents the polynomial as a [String] where name of variable with index `i` is [withVariableName] + `"_${i+1}"`
+     * and with brackets around the string if needed (i.e. when there are at least two addends in the representation).
+     * Consider that monomials are sorted in lexicographic order.
+     */
     fun toStringWithBrackets(withVariableName: String = variableName): String =
         with(toString(withVariableName)) { if (coefficients.count() == 1) this else "($this)" }
 
+    /**
+     * Represents the polynomial as a [String] naming variables by [namer] and with brackets around the string if needed
+     * (i.e. when there are at least two addends in the representation).
+     * Consider that monomials are sorted in lexicographic order.
+     */
     fun toStringWithBrackets(namer: (Int) -> String): String =
         with(toString(namer)) { if (coefficients.count() == 1) this else "($this)" }
 
+    /**
+     * Represents the polynomial as a [String] where name of variable with index `i` is [withVariableName] + `"_${i+1}"`.
+     * Consider that monomials are sorted in **reversed** lexicographic order.
+     */
     fun toReversedString(withVariableName: String = variableName): String =
         coefficients.entries
             .sortedWith { o1, o2 -> -monomialComparator.compare(o1.key, o2.key) }
@@ -531,6 +735,10 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
             .joinToString(separator = " + ") { it }
             .ifEmpty { "0" }
 
+    /**
+     * Represents the polynomial as a [String] naming variables by [namer].
+     * Consider that monomials are sorted in **reversed** lexicographic order.
+     */
     fun toReversedString(namer: (Int) -> String): String =
         coefficients.entries
             .sortedWith { o1, o2 -> -monomialComparator.compare(o1.key, o2.key) }
@@ -558,14 +766,30 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
             .joinToString(separator = " + ") { it }
             .ifEmpty { "0" }
 
+    /**
+     * Represents the polynomial as a [String] where name of variable with index `i` is [withVariableName] + `"_${i+1}"`
+     * and with brackets around the string if needed (i.e. when there are at least two addends in the representation).
+     * Consider that monomials are sorted in **reversed** lexicographic order.
+     */
     fun toReversedStringWithBrackets(withVariableName: String = variableName): String =
         with(toReversedString(withVariableName)) { if (coefficients.count() == 1) this else "($this)" }
 
+    /**
+     * Represents the polynomial as a [String] naming variables by [namer] and with brackets around the string if needed
+     * (i.e. when there are at least two addends in the representation).
+     * Consider that monomials are sorted in **reversed** lexicographic order.
+     */
     fun toReversedStringWithBrackets(namer: (Int) -> String): String =
         with(toReversedString(namer)) { if (coefficients.count() == 1) this else "($this)" }
 
+    /**
+     * Converts the value to [RationalFunction].
+     */
     fun toRationalFunction() = RationalFunction(this)
 
+    /**
+     * Converts the value to [LabeledPolynomial].
+     */
     fun toLabeledPolynomial() = LabeledPolynomial(
         coefficients
             .asSequence()
@@ -581,15 +805,32 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
         toCheckInput = false
     )
 
+    /**
+     * Converts the value to [LabeledRationalFunction].
+     */
     fun toLabeledRationalFunction() = LabeledRationalFunction(toLabeledPolynomial())
 
     companion object {
+        /**
+         * Default name of variables used in string representations.
+         *
+         * @see Polynomial.toString
+         */
         var variableName = "x"
 
+        /**
+         * Represents internal [Polynomial] errors.
+         */
         private class PolynomialError(message: String): Error(message)
 
+        /**
+         * Returns the same degrees description of the monomial, but without extra zero degrees on the end.
+         */
         internal fun List<Int>.cleanUp() = subList(0, indexOfLast { it != 0 } + 1)
 
+        /**
+         * Comparator for lexicographic comparison of monomials.
+         */
         val monomialComparator =
             object : Comparator<List<Int>> {
                 override fun compare(o1: List<Int>?, o2: List<Int>?): Int {
@@ -608,6 +849,9 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                 }
             }
 
+        /**
+         * Represents result of division with remainder.
+         */
         data class DividingResult<T : Field<T>>(
             val quotient: Polynomial<T>,
             val reminder: Polynomial<T>

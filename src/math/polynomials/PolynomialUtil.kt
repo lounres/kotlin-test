@@ -412,8 +412,8 @@ fun <T: Field<T>> polynomialBinGCD(P: Polynomial<T>, Q: Polynomial<T>): Polynomi
     if (P.isZero()) return Q
     if (Q.isZero()) return P
 
-    if (P.isOne()) return P
-    if (Q.isOne()) return Q
+    if (P.isConstant()) return P
+    if (Q.isConstant()) return Q
 
     val variable = max(P.countOfVariables, Q.countOfVariables) - 1
     val GCDByTheVariable = polynomialBinGCD(P.markOutVariable(variable), Q.markOutVariable(variable)).markInVariable(variable)

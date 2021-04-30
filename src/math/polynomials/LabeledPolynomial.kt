@@ -5,15 +5,15 @@ import kotlin.math.max
 
 
 /**
- * Represents multivariate polynomials with labeled variables..
+ * Represents multivariate polynomials with labeled variables.
  *
  * @param T Ring in which the polynomial is considered.
  * @param coefs Coefficients of the instants.
  * @param toCheckInput If it's `true` cleaning of [coefficients] is executed otherwise it is not.
  *
  * @constructor Gets the coefficients in format of [coefficients] field and cleans it: removes zero degrees from keys of
- * received map, sums up proportional monomials, removes aero monomials, and if result is zero map adds only element in
- * it.
+ * received maps, sums up proportional monomials, removes zero monomials, and if result is empty map adds only element
+ * in it.
  *
  * @throws LabeledPolynomialError If no coefficient received or if any of degrees in any monomial is negative.
  */
@@ -28,7 +28,7 @@ internal constructor(
      * key is map that associates variables in the monomial with multiplicity of them occurring in the monomial.
      * For example polynomial
      * ```
-     * 5 a^2 c^3 - 6 b + 0 bc
+     * 5 a^2 c^3 - 6 b + 0 b c
      * ```
      * has coefficients represented as
      * ```
@@ -44,7 +44,7 @@ internal constructor(
      * ```
      * where `a`, `b` and `c` are corresponding [Variable] objects.
      *
-     * There is only one special case: if the polynomial is zero, is contains only one monomial:
+     * There is only one special case: if the polynomial is zero, the map contains only one monomial:
      * ```
      * mapOf<Variable, Int>() to ZERO
      * ```
@@ -136,7 +136,7 @@ internal constructor(
      * Gets the coefficients in format of [coefficients] field and cleans it: removes zero degrees from keys of received
      * map, sums up proportional monomials, removes aero monomials, and if result is zero map adds only element in it.
      *
-     * @param pairs Collection of pairs that represents monomials.
+     * @param pairs Collection of pairs that represent monomials.
      * @param toCheckInput If it's `true` cleaning of [coefficients] is executed otherwise it is not.
      *
      * @throws LabeledPolynomialError If no coefficient received or if any of degrees in any monomial is negative.
