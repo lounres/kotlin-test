@@ -1,5 +1,7 @@
 package math.polynomials
 
+import math.polynomials.LabeledPolynomial.Companion.cleanUp
+import math.polynomials.Polynomial.Companion.cleanUp
 import math.ringsAndFields.*
 import kotlin.math.max
 
@@ -77,9 +79,32 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
      */
     internal val ringZero: T get() = ringExemplar.getZero()
 
-    internal constructor(vararg pairs: Pair<List<Int>, T>, toCheckInput: Boolean) : this(mapOf(*pairs), toCheckInput)
-    constructor(coefs: Map<List<Int>, T>) : this(coefs, true)
-    constructor(vararg pairs: Pair<List<Int>, T>) : this(mapOf(*pairs), true)
+    internal constructor(pairs: Collection<Pair<List<Int>, T>>, toCheckInput: Boolean) : this(
+        if (toCheckInput) {
+            if (pairs.isEmpty()) throw PolynomialError("Polynomial must contain at least one (maybe zero) monomial")
+            if (pairs.any { it.first.any { it < 0 } }) throw PolynomialError("All monomials should contain only non-negative degrees")
+
+            val ringExemplar = pairs.first().second
+            val fixedCoefs = mutableMapOf<List<Int>, T>()
+
+            for (entry in pairs) {
+                val key = entry.first.cleanUp()
+                val value = entry.second
+                fixedCoefs[key] = if (key in fixedCoefs) fixedCoefs[key]!! + value else value
+            }
+
+            fixedCoefs
+                .filter { it.value.isNotZero() }
+                .ifEmpty {
+                    mapOf(emptyList<Int>() to ringExemplar.getZero())
+                }
+        } else pairs.toMap(),
+        toCheckInput = false
+    )
+    internal constructor(vararg pairs: Pair<List<Int>, T>, toCheckInput: Boolean) : this(pairs.toList(), toCheckInput)
+    constructor(coefs: Map<List<Int>, T>) : this(coefs, toCheckInput = true)
+    constructor(pairs: Collection<Pair<List<Int>, T>>) : this(pairs, toCheckInput = true)
+    constructor(vararg pairs: Pair<List<Int>, T>) : this(*pairs, toCheckInput = true)
 
     override fun getZero(): Polynomial<T> = Polynomial(emptyList<Int>() to ringZero, toCheckInput = false)
     override fun getOne(): Polynomial<T> = Polynomial(emptyList<Int>() to ringOne, toCheckInput = false)
@@ -130,6 +155,72 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                 toCheckInput = false
             )
 
+    override operator fun plus(other: Integer): Polynomial<T> =
+        if (other.isZero()) this
+        else
+            Polynomial(
+                coefficients
+                    .toMutableMap()
+                    .apply {
+                        val key = emptyList<Int>()
+                        if (key in this) {
+                            val res = this[key]!! + other
+                            if (res.isZero() && size == 1) {
+                                this[key] = res
+                            } else {
+                                this.remove(key)
+                            }
+                        } else {
+                            this[key] = ringOne * other
+                        }
+                    },
+                toCheckInput = false
+            )
+
+    override operator fun plus(other: Int): Polynomial<T> =
+        if (other == 0) this
+        else
+            Polynomial(
+                coefficients
+                    .toMutableMap()
+                    .apply {
+                        val key = emptyList<Int>()
+                        if (key in this) {
+                            val res = this[key]!! + other
+                            if (res.isZero() && size == 1) {
+                                this[key] = res
+                            } else {
+                                this.remove(key)
+                            }
+                        } else {
+                            this[key] = ringOne * other
+                        }
+                    },
+                toCheckInput = false
+            )
+
+    override operator fun plus(other: Long): Polynomial<T> =
+        if (other == 0L) this
+        else
+            Polynomial(
+                coefficients
+                    .toMutableMap()
+                    .apply {
+                        val key = emptyList<Int>()
+                        if (key in this) {
+                            val res = this[key]!! + other
+                            if (res.isZero() && size == 1) {
+                                this[key] = res
+                            } else {
+                                this.remove(key)
+                            }
+                        } else {
+                            this[key] = ringOne * other
+                        }
+                    },
+                toCheckInput = false
+            )
+
     override operator fun minus(other: Polynomial<T>): Polynomial<T> =
         Polynomial(
             coefficients
@@ -165,6 +256,72 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                 toCheckInput = false
             )
 
+    override operator fun minus(other: Integer): Polynomial<T> =
+        if (other.isZero()) this
+        else
+            Polynomial(
+                coefficients
+                    .toMutableMap()
+                    .apply {
+                        val key = emptyList<Int>()
+                        if (key in this) {
+                            val res = this[key]!! - other
+                            if (res.isZero() && size == 1) {
+                                this[key] = res
+                            } else {
+                                this.remove(key)
+                            }
+                        } else {
+                            this[key] = -ringOne * other
+                        }
+                    },
+                toCheckInput = false
+            )
+
+    override operator fun minus(other: Int): Polynomial<T> =
+        if (other == 0) this
+        else
+            Polynomial(
+                coefficients
+                    .toMutableMap()
+                    .apply {
+                        val key = emptyList<Int>()
+                        if (key in this) {
+                            val res = this[key]!! - other
+                            if (res.isZero() && size == 1) {
+                                this[key] = res
+                            } else {
+                                this.remove(key)
+                            }
+                        } else {
+                            this[key] = -ringOne * other
+                        }
+                    },
+                toCheckInput = false
+            )
+
+    override operator fun minus(other: Long): Polynomial<T> =
+        if (other == 0L) this
+        else
+            Polynomial(
+                coefficients
+                    .toMutableMap()
+                    .apply {
+                        val key = emptyList<Int>()
+                        if (key in this) {
+                            val res = this[key]!! - other
+                            if (res.isZero() && size == 1) {
+                                this[key] = res
+                            } else {
+                                this.remove(key)
+                            }
+                        } else {
+                            this[key] = -ringOne * other
+                        }
+                    },
+                toCheckInput = false
+            )
+
     override operator fun times(other: Polynomial<T>): Polynomial<T> =
         when {
             isZero() -> this
@@ -181,7 +338,8 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                                 this[degs] = if (degs in this) this[degs]!! + c else c
                             }
                         }
-                        .filterValues { it.isNotZero() },
+                        .filterValues { it.isNotZero() }
+                        .ifEmpty { mapOf(emptyList<Int>() to ringZero) },
                     toCheckInput = false
                 )
         }
@@ -191,7 +349,9 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
         else
             Polynomial(
                 coefficients
-                    .mapValues { it.value * other },
+                    .mapValues { it.value * other }
+                    .filterValues { it.isNotZero() }
+                    .ifEmpty { mapOf(emptyList<Int>() to ringZero) },
                 toCheckInput = false
             )
 
@@ -200,7 +360,9 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
         else
             Polynomial(
                 coefficients
-                    .mapValues { it.value * other },
+                    .mapValues { it.value * other }
+                    .filterValues { it.isNotZero() }
+                    .ifEmpty { mapOf(emptyList<Int>() to ringZero) },
                 toCheckInput = false
             )
 
@@ -209,7 +371,9 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
         else
             Polynomial(
                 coefficients
-                    .mapValues { it.value * other },
+                    .mapValues { it.value * other }
+                    .filterValues { it.isNotZero() }
+                    .ifEmpty { mapOf(emptyList<Int>() to ringZero) },
                 toCheckInput = false
             )
 
@@ -218,7 +382,9 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
         else
             Polynomial(
                 coefficients
-                    .mapValues { it.value * other },
+                    .mapValues { it.value * other }
+                    .filterValues { it.isNotZero() }
+                    .ifEmpty { mapOf(emptyList<Int>() to ringZero) },
                 toCheckInput = false
             )
 
@@ -241,17 +407,15 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
             }
         }
 
-    override fun hashCode(): Int = javaClass.hashCode()
+    override fun hashCode(): Int = javaClass.hashCode() // TODO: Rewrite
 
     operator fun invoke(arg: Map<Int, T>): Polynomial<T> =
         Polynomial(
             coefficients
-                .asSequence()
                 .map { (degs, c) ->
                     degs.mapIndexed { index, deg -> if (index in arg) 0 else deg } to
                             degs.foldIndexed(c) { index, acc, deg -> if (index in arg) multiplyByPower(acc, arg[index]!!, deg) else acc }
                 }
-                .toMap()
         )
 
     @JvmName("invokePolynomial")
@@ -265,7 +429,7 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
                     )
                 ) { index, acc, deg -> if (index in arg) multiplyByPower(acc, arg[index]!!, deg) else acc }
             }
-            .reduce { acc, polynomial -> acc + polynomial }
+            .reduce { acc, polynomial -> acc + polynomial } // TODO: Rewrite. Might be slow.
 
     @JvmName("invokeRationalFunction")
     operator fun invoke(arg: Map<Int, RationalFunction<T>>): RationalFunction<T> =
@@ -307,6 +471,39 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
             .joinToString(separator = " + ") { it }
             .ifEmpty { "0" }
 
+    fun toString(namer: (Int) -> String): String =
+        coefficients.entries
+            .sortedWith { o1, o2 -> monomialComparator.compare(o1.key, o2.key) }
+            .asSequence()
+            .map { (degs, t) ->
+                if (degs.isEmpty()) "$t"
+                else {
+                    when {
+                        t.isOne() -> ""
+                        t == -t.getOne() -> "-"
+                        else -> "$t "
+                    } +
+                            degs
+                                .mapIndexed { index, deg ->
+                                    when (deg) {
+                                        0 -> ""
+                                        1 -> namer(index)
+                                        else -> "${namer(index)}^$deg"
+                                    }
+                                }
+                                .filter { it.isNotEmpty() }
+                                .joinToString(separator = " ") { it }
+                }
+            }
+            .joinToString(separator = " + ") { it }
+            .ifEmpty { "0" }
+
+    fun toStringWithBrackets(withVariableName: String = variableName): String =
+        with(toString(withVariableName)) { if (coefficients.count() == 1) this else "($this)" }
+
+    fun toStringWithBrackets(namer: (Int) -> String): String =
+        with(toString(namer)) { if (coefficients.count() == 1) this else "($this)" }
+
     fun toReversedString(withVariableName: String = variableName): String =
         coefficients.entries
             .sortedWith { o1, o2 -> -monomialComparator.compare(o1.key, o2.key) }
@@ -334,11 +531,38 @@ class Polynomial<T: Ring<T>> internal constructor(coefs: Map<List<Int>, T>, toCh
             .joinToString(separator = " + ") { it }
             .ifEmpty { "0" }
 
-    fun toStringWithBrackets(withVariableName: String = variableName): String =
-        with(toString(withVariableName)) { if (coefficients.count() == 1) this else "($this)" }
+    fun toReversedString(namer: (Int) -> String): String =
+        coefficients.entries
+            .sortedWith { o1, o2 -> -monomialComparator.compare(o1.key, o2.key) }
+            .asSequence()
+            .map { (degs, t) ->
+                if (degs.isEmpty()) "$t"
+                else {
+                    when {
+                        t.isOne() -> ""
+                        t == -t.getOne() -> "-"
+                        else -> "$t "
+                    } +
+                            degs
+                                .mapIndexed { index, deg ->
+                                    when (deg) {
+                                        0 -> ""
+                                        1 -> namer(index)
+                                        else -> "${namer(index)}^$deg"
+                                    }
+                                }
+                                .filter { it.isNotEmpty() }
+                                .joinToString(separator = " ") { it }
+                }
+            }
+            .joinToString(separator = " + ") { it }
+            .ifEmpty { "0" }
 
     fun toReversedStringWithBrackets(withVariableName: String = variableName): String =
         with(toReversedString(withVariableName)) { if (coefficients.count() == 1) this else "($this)" }
+
+    fun toReversedStringWithBrackets(namer: (Int) -> String): String =
+        with(toReversedString(namer)) { if (coefficients.count() == 1) this else "($this)" }
 
     fun toRationalFunction() = RationalFunction(this)
 

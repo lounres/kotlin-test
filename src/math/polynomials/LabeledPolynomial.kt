@@ -194,7 +194,7 @@ internal constructor(
      *
      * @throws LabeledPolynomialError If no coefficient received or if any of degrees in any monomial is negative.
      */
-    constructor(pairs: List<Pair<Map<Variable, Int>, T>>) : this(pairs, toCheckInput = true)
+    constructor(pairs: Collection<Pair<Map<Variable, Int>, T>>) : this(pairs, toCheckInput = true)
     /**
      * Gets the coefficients in format of [coefficients] field and cleans it: removes zero degrees from keys of received
      * map, sums up proportional monomials, removes aero monomials, and if result is zero map adds only element in it.
@@ -572,7 +572,7 @@ internal constructor(
                 toCheckInput = false
             )
 
-
+    // TODO: Docs
     override fun equals(other: Any?): Boolean =
         when {
             this === other -> true
@@ -592,7 +592,8 @@ internal constructor(
             }
         }
 
-    override fun hashCode(): Int = javaClass.hashCode()
+    // TODO: Docs
+    override fun hashCode(): Int = javaClass.hashCode() // TODO: Rewrite
 
     /**
      * Returns polynomial that is got as result of substitution of values of [arg] instead of corresponding keys. All
@@ -650,7 +651,7 @@ internal constructor(
      * Represents the polynomial as a [String] with names of variables substituted with names from [names].
      * Consider that monomials are sorted in lexicographic order.
      */
-    fun toString(names: Map<Variable, String>): String =
+    fun toString(names: Map<Variable, String> = emptyMap()): String =
         coefficients.entries
             .sortedWith { o1, o2 -> monomialComparator.compare(o1.key, o2.key) }
             .asSequence()
@@ -714,7 +715,7 @@ internal constructor(
      * brackets around the string if needed (i.e. when there are at least two addends in the representation).
      * Consider that monomials are sorted in lexicographic order.
      */
-    fun toStringWithBrackets(names: Map<Variable, String>): String =
+    fun toStringWithBrackets(names: Map<Variable, String> = emptyMap()): String =
         with(toString(names)) { if (coefficients.count() == 1) this else "($this)" }
 
     /**
@@ -729,7 +730,7 @@ internal constructor(
      * Represents the polynomial as a [String] with names of variables substituted with names from [names].
      * Consider that monomials are sorted in **reversed** lexicographic order.
      */
-    fun toReversedString(names: Map<Variable, String>): String =
+    fun toReversedString(names: Map<Variable, String> = emptyMap()): String =
         coefficients.entries
             .sortedWith { o1, o2 -> -monomialComparator.compare(o1.key, o2.key) }
             .asSequence()
@@ -793,7 +794,7 @@ internal constructor(
      * brackets around the string if needed (i.e. when there are at least two addends in the representation).
      * Consider that monomials are sorted in **reversed** lexicographic order.
      */
-    fun toReversedStringWithBrackets(names: Map<Variable, String>): String =
+    fun toReversedStringWithBrackets(names: Map<Variable, String> = emptyMap()): String =
         with(toReversedString(names)) { if (coefficients.count() == 1) this else "($this)" }
 
     /**

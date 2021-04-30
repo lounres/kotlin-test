@@ -203,6 +203,9 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
             .joinToString(separator = " + ") { it }
             .run { ifEmpty { "0" } }
 
+    fun toStringWithBrackets(withVariableName: String = variableName): String =
+        with(toString(withVariableName)) { if (coefficients.count { it.isNotZero() } <= 1) this else "($this)" }
+
     fun toReversedString(withVariableName: String = variableName): String =
         coefficients
             .asSequence()
@@ -228,9 +231,6 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
             }
             .joinToString(separator = " + ") { it }
             .run { ifEmpty { "0" } }
-
-    fun toStringWithBrackets(withVariableName: String = variableName): String =
-        with(toString(withVariableName)) { if (coefficients.count { it.isNotZero() } <= 1) this else "($this)" }
 
     fun toReversedStringWithBrackets(withVariableName: String = variableName): String =
         with(toReversedString(withVariableName)) { if (coefficients.count { it.isNotZero() } == 1) this else "($this)" }

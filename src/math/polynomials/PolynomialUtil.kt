@@ -327,7 +327,7 @@ internal infix fun <T: Ring<T>> Polynomial<T>.invokeRFTakeNumerator (arg: Map<In
                         degrees[index] - degs.getOrElse(index) { 0 }
                     ) else acc }
             }
-            .reduce { acc, polynomial -> acc + polynomial }
+            .reduce { acc, polynomial -> acc + polynomial } // TODO: Rewrite. Might be slow.
 // endregion
 
 // region Greatest Common Divisor (GCD) computation

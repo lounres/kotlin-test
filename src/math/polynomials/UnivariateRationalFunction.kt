@@ -171,25 +171,34 @@ class UnivariateRationalFunction<T: Ring<T>> (val numerator: UnivariatePolynomia
             )
     }
 
-    override fun toString(): String =
+    override fun toString(): String = toString(UnivariatePolynomial.variableName)
+
+    fun toString(withVariableName: String = UnivariatePolynomial.variableName): String =
         when(true) {
             numerator.isZero() -> "0"
-            denominator.isOne() -> numerator.toString()
-            else ->
-                (if (numerator.coefficients.count { it.isNotZero() } <= 1) numerator.toString() else "($numerator)") +
-                        " / " +
-                        (if (denominator.coefficients.count { it.isNotZero() } <= 1) denominator.toString() else "($denominator)")
+            denominator.isOne() -> numerator.toString(withVariableName)
+            else -> "${numerator.toStringWithBrackets(withVariableName)}/${denominator.toStringWithBrackets(withVariableName)}"
         }
 
-
-    fun toReversedString(): String =
+    fun toStringWithBrackets(withVariableName: String = UnivariatePolynomial.variableName): String =
         when(true) {
             numerator.isZero() -> "0"
-            denominator.isOne() -> numerator.toReversedString()
-            else ->
-                (if (numerator.coefficients.count { it.isNotZero() } <= 1) numerator.toReversedString() else "(" + numerator.toReversedString() + ")") +
-                        " / " +
-                        (if (denominator.coefficients.count { it.isNotZero() } <= 1) denominator.toReversedString() else "(" + denominator.toReversedString() + ")")
+            denominator.isOne() -> numerator.toStringWithBrackets(withVariableName)
+            else -> "(${numerator.toStringWithBrackets(withVariableName)}/${denominator.toStringWithBrackets(withVariableName)})"
+        }
+
+    fun toReversedString(withVariableName: String = UnivariatePolynomial.variableName): String =
+        when(true) {
+            numerator.isZero() -> "0"
+            denominator.isOne() -> numerator.toReversedString(withVariableName)
+            else -> "${numerator.toReversedStringWithBrackets(withVariableName)}/${denominator.toReversedStringWithBrackets(withVariableName)}"
+        }
+
+    fun toReversedStringWithBrackets(withVariableName: String = UnivariatePolynomial.variableName): String =
+        when(true) {
+            numerator.isZero() -> "0"
+            denominator.isOne() -> numerator.toReversedStringWithBrackets(withVariableName)
+            else -> "(${numerator.toReversedStringWithBrackets(withVariableName)}/${denominator.toReversedStringWithBrackets(withVariableName)})"
         }
 
     fun removeZeros() =

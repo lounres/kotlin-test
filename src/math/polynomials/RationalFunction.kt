@@ -187,14 +187,62 @@ class RationalFunction<T: Ring<T>> (val numerator: Polynomial<T>, val denominato
         return RationalFunction(num, den)
     }
 
-    override fun toString(): String =
+    override fun toString(): String = toString(Polynomial.variableName)
+
+    fun toString(withVariableName: String = Polynomial.variableName): String =
         when(true) {
             numerator.isZero() -> "0"
-            denominator.isOne() -> numerator.toString()
-            else ->
-                (if (numerator.coefficients.count() <= 1) numerator.toString() else "($numerator)") +
-                        " / " +
-                        (if (denominator.coefficients.count() <= 1) denominator.toString() else "($denominator)")
+            denominator.isOne() -> numerator.toString(withVariableName)
+            else -> "${numerator.toStringWithBrackets(withVariableName)}/${denominator.toStringWithBrackets(withVariableName)}"
+        }
+
+    fun toString(namer: (Int) -> String): String =
+        when(true) {
+            numerator.isZero() -> "0"
+            denominator.isOne() -> numerator.toString(namer)
+            else -> "${numerator.toStringWithBrackets(namer)}/${denominator.toStringWithBrackets(namer)}"
+        }
+
+    fun toStringWithBrackets(withVariableName: String = Polynomial.variableName): String =
+        when(true) {
+            numerator.isZero() -> "0"
+            denominator.isOne() -> numerator.toStringWithBrackets(withVariableName)
+            else -> "(${numerator.toStringWithBrackets(withVariableName)}/${denominator.toStringWithBrackets(withVariableName)})"
+        }
+
+    fun toStringWithBrackets(namer: (Int) -> String): String =
+        when(true) {
+            numerator.isZero() -> "0"
+            denominator.isOne() -> numerator.toStringWithBrackets(namer)
+            else -> "(${numerator.toStringWithBrackets(namer)}/${denominator.toStringWithBrackets(namer)})"
+        }
+
+    fun toReversedString(withVariableName: String = Polynomial.variableName): String =
+        when(true) {
+            numerator.isZero() -> "0"
+            denominator.isOne() -> numerator.toReversedString(withVariableName)
+            else -> "${numerator.toReversedStringWithBrackets(withVariableName)}/${denominator.toReversedStringWithBrackets(withVariableName)}"
+        }
+
+    fun toReversedString(namer: (Int) -> String): String =
+        when(true) {
+            numerator.isZero() -> "0"
+            denominator.isOne() -> numerator.toReversedString(namer)
+            else -> "${numerator.toReversedStringWithBrackets(namer)}/${denominator.toReversedStringWithBrackets(namer)}"
+        }
+
+    fun toReversedStringWithBrackets(withVariableName: String = Polynomial.variableName): String =
+        when(true) {
+            numerator.isZero() -> "0"
+            denominator.isOne() -> numerator.toReversedStringWithBrackets(withVariableName)
+            else -> "(${numerator.toReversedStringWithBrackets(withVariableName)}/${denominator.toReversedStringWithBrackets(withVariableName)})"
+        }
+
+    fun toReversedStringWithBrackets(namer: (Int) -> String): String =
+        when(true) {
+            numerator.isZero() -> "0"
+            denominator.isOne() -> numerator.toReversedStringWithBrackets(namer)
+            else -> "(${numerator.toReversedStringWithBrackets(namer)}/${denominator.toReversedStringWithBrackets(namer)})"
         }
 
     fun toLabeledRationalFunction() = LabeledRationalFunction(numerator.toLabeledPolynomial(), denominator.toLabeledPolynomial())
