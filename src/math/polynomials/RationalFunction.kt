@@ -4,8 +4,14 @@ import math.ringsAndFields.*
 import kotlin.math.max
 
 
-class RationalFunction<T: Ring<T>> (val numerator: Polynomial<T>, val denominator: Polynomial<T>) : Field<RationalFunction<T>> {
+class RationalFunction<T: Ring<T>> (
+    val numerator: Polynomial<T>,
+    val denominator: Polynomial<T>
+) : Field<RationalFunction<T>> {
     init { if (denominator.isZero()) throw ArithmeticException("/ by zero") }
+
+    operator fun component1(): Polynomial<T> = numerator
+    operator fun component2(): Polynomial<T> = denominator
 
     val countOfVariables by lazy { max(numerator.countOfVariables, denominator.countOfVariables) }
     val degree by lazy { numerator.degree - denominator.degree }
@@ -15,20 +21,20 @@ class RationalFunction<T: Ring<T>> (val numerator: Polynomial<T>, val denominato
     internal val ringOne get() = ringExemplar.getOne()
     internal val ringZero get() = ringExemplar.getZero()
 
-    constructor(numerator: Map<List<Int>, T>, denominator: Map<List<Int>, T>) : this(
-        Polynomial(numerator),
-        Polynomial(denominator)
+    constructor(numeratorCoefficients: Map<List<Int>, T>, denominatorCoefficients: Map<List<Int>, T>) : this(
+        Polynomial(numeratorCoefficients),
+        Polynomial(denominatorCoefficients)
     )
-    constructor(numerator: List<Pair<List<Int>, T>>, denominator: List<Pair<List<Int>, T>>) : this(
-        Polynomial(numerator.toMap()),
-        Polynomial(denominator.toMap())
+    constructor(numeratorCoefficients: Collection<Pair<List<Int>, T>>, denominatorCoefficients: Collection<Pair<List<Int>, T>>) : this(
+        Polynomial(numeratorCoefficients),
+        Polynomial(denominatorCoefficients)
     )
     constructor(numerator: Polynomial<T>) : this(numerator, numerator.getOne())
-    constructor(numerator: Map<List<Int>, T>) : this(
-        Polynomial(numerator)
+    constructor(numeratorCoefficients: Map<List<Int>, T>) : this(
+        Polynomial(numeratorCoefficients)
     )
-    constructor(numerator: List<Pair<List<Int>, T>>) : this(
-        Polynomial(numerator.toMap())
+    constructor(numeratorCoefficients: Collection<Pair<List<Int>, T>>) : this(
+        Polynomial(numeratorCoefficients)
     )
     // TODO: Think about other constructors
 

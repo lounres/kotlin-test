@@ -191,12 +191,8 @@ internal infix fun <T: Ring<T>> UnivariatePolynomial<T>.invokeRFTakeNumerator (a
 // endregion
 
 // region Greatest Common Divisor (GCD) computation
-fun <T: Field<T>> polynomialBinGCD(P: UnivariatePolynomial<T>, Q: UnivariatePolynomial<T>): UnivariatePolynomial<T> {
-    println(P)
-    println(Q)
-    println()
-    return if (Q.isZero()) P else polynomialBinGCD(Q, P % Q)
-}
+fun <T: Field<T>> polynomialBinGCD(P: UnivariatePolynomial<T>, Q: UnivariatePolynomial<T>): UnivariatePolynomial<T> =
+    if (Q.isZero()) P else polynomialBinGCD(Q, P % Q)
 
 /**
  * Returns GCD (greatest common divider) of polynomials in [pols].

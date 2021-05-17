@@ -11,13 +11,13 @@ fun <T: Ring<T>> T.toUnivariateRationalFunction() = UnivariateRationalFunction(t
 
 operator fun <T: Field<T>> UnivariateRationalFunction<T>.invoke(arg: T): T = numerator(arg) / denominator(arg)
 
-fun <T: Field<T>> UnivariateRationalFunction<T>.reduced(): UnivariateRationalFunction<T> {
-    val greatestCommonDivider = polynomialGCD(numerator, denominator)
-    return UnivariateRationalFunction(
-        numerator / greatestCommonDivider,
-        denominator / greatestCommonDivider
-    )
-}
+fun <T: Field<T>> UnivariateRationalFunction<T>.reduced(): UnivariateRationalFunction<T> =
+    polynomialGCD(numerator, denominator).let {
+        UnivariateRationalFunction(
+            numerator / it,
+            denominator / it
+        )
+    }
 
 // endregion
 

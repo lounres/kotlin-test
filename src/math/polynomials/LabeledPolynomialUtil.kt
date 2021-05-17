@@ -406,9 +406,6 @@ internal fun <T: Field<T>> UnivariatePolynomial<LabeledRationalFunction<T>>.mark
  * @return GCD of the polynomials.
  */
 fun <T: Field<T>> polynomialBinGCD(P: LabeledPolynomial<T>, Q: LabeledPolynomial<T>): LabeledPolynomial<T> {
-    println(P)
-    println(Q)
-    println()
     if (P.isZero()) return Q
     if (Q.isZero()) return P
 

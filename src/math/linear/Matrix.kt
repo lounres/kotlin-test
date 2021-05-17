@@ -1,7 +1,6 @@
 package math.linear
 
 import math.ringsAndFields.*
-import java.lang.IndexOutOfBoundsException
 
 
 open class Matrix<T: Ring<T>> internal constructor(
@@ -9,7 +8,7 @@ open class Matrix<T: Ring<T>> internal constructor(
     val countOfColumns: Int,
     val coefficients: List<List<T>>,
     toCheckInput: Boolean = true
-) {
+) : Iterable<T> {
     init {
         if (toCheckInput) {
             if (countOfRows <= 0) throw IllegalArgumentException("Count of rows must be positive")
@@ -55,10 +54,20 @@ open class Matrix<T: Ring<T>> internal constructor(
         fromRow
     }
 
-    val rowIndices get() = 0 until countOfRows
-    val columnIndices get() = 0 until countOfColumns
+    val rowIndices : Iterable<Int> get() = 0 until countOfRows
+    val columnIndices : Iterable<Int> get() = 0 until countOfColumns
     val indices: List<MatrixIndex>
         get() = rowIndices.flatMap { rowIndex -> columnIndices.map { columnIndex -> MatrixIndex(rowIndex, columnIndex) } }
+
+    val horizontalCoefficientsList : List<T>
+        get() = coefficients.flatten()
+    val verticalCoefficientsList : List<T>
+        get() = mutableListOf<T>()
+            .apply {
+                for (columnIndex in columnIndices) for (rowIndex in rowIndices) {
+                    add(coefficients[rowIndex][columnIndex])
+                }
+            }
 
     internal val ringExemplar: T get() = coefficients.first().first()
     internal val ringOne: T get() = ringExemplar.getOne()
@@ -157,14 +166,34 @@ open class Matrix<T: Ring<T>> internal constructor(
 
     operator fun get(rowIndex: Int, columnIndex: Int) : T =
         when {
-            rowIndex !in 0 until countOfRows -> throw MatrixIndexOutOfBoundsException("Row index out of bounds: $rowIndex got, in 0..${countOfRows-1} expected")
-            columnIndex !in 0 until countOfColumns -> throw MatrixIndexOutOfBoundsException("Column index out of bounds: $columnIndex got, in 0..${countOfColumns-1} expected")
+            rowIndex !in 0 until countOfRows -> throw IndexOutOfBoundsException("Row index out of bounds: $rowIndex got, in 0..${countOfRows-1} expected")
+            columnIndex !in 0 until countOfColumns -> throw IndexOutOfBoundsException("Column index out of bounds: $columnIndex got, in 0..${countOfColumns-1} expected")
             else -> coefficients[rowIndex][columnIndex]
         }
 
     operator fun get(index: Pair<Int, Int>) : T = get(index.first, index.second)
 
     operator fun get(index: MatrixIndex) : T = get(index.rowIndex, index.columnIndex)
+
+    override fun iterator(): Iterator<T> =
+        object : Iterator<T> {
+            var cursorRow = 0 // row index of next element to return
+            var cursorColumn = 0 // column index of next element to return
+
+            override fun hasNext(): Boolean = cursorRow != countOfRows
+
+            override fun next(): T {
+                if (cursorRow == countOfRows) throw NoSuchElementException()
+                return coefficients[cursorRow][cursorColumn].also {
+                    if (cursorColumn == countOfColumns - 1) {
+                        cursorColumn = 0
+                        cursorRow += 1
+                    } else {
+                        cursorColumn += 1
+                    }
+                }
+            }
+        }
 
     override fun equals(other: Any?): Boolean =
         when {
@@ -192,7 +221,7 @@ open class Matrix<T: Ring<T>> internal constructor(
         coefficients.joinToString(prefix = "{", postfix = "}") { it.joinToString(prefix = "{", postfix = "}") { it.toString() } }
 
     fun subMatrix(rows: Iterable<Int>, columns: Iterable<Int>): Matrix<T> {
-        val cleanedRows = rows.asSequence().apply { when {
+        val cleanedRows = rows.asSequence().apply { when { // TODO: Check WTH is this.
             first() < 0 -> throw IllegalArgumentException("Can't select row with index less than 0")
             last() >= countOfRows -> throw IllegalArgumentException("Can't select row with index more than max row index")
         } }.distinct().sorted().toList().apply { if(isEmpty()) throw IllegalArgumentException("No row is selected") }
@@ -209,16 +238,4 @@ open class Matrix<T: Ring<T>> internal constructor(
 
     open fun transposed() =
         Matrix(countOfColumns, countOfRows) { rowIndex, columnIndex -> coefficients[columnIndex][rowIndex] }
-
-    companion object {
-        data class MatrixIndex (
-            val rowIndex: Int,
-            val columnIndex: Int
-            )
-
-        class MatrixIndexOutOfBoundsException: IndexOutOfBoundsException {
-            constructor() : super()
-            constructor(message: String) : super(message)
-        }
-    }
 }

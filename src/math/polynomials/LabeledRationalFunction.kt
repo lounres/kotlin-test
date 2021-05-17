@@ -3,12 +3,14 @@ package math.polynomials
 import math.ringsAndFields.*
 
 
-class LabeledRationalFunction<T : Ring<T>>
-    (
+class LabeledRationalFunction<T : Ring<T>>(
     val numerator: LabeledPolynomial<T>,
     val denominator: LabeledPolynomial<T>
 ) : Field<LabeledRationalFunction<T>> {
     init { if (denominator.isZero()) throw ArithmeticException("/ by zero") }
+
+    operator fun component1(): LabeledPolynomial<T> = numerator
+    operator fun component2(): LabeledPolynomial<T> = denominator
 
     val degree by lazy { numerator.degree - denominator.degree }
     val variables by lazy { numerator.variables union denominator.variables }
@@ -23,23 +25,23 @@ class LabeledRationalFunction<T : Ring<T>>
     internal val ringOne get() = ringExemplar.getOne()
     internal val ringZero get() = ringExemplar.getZero()
 
-    constructor(numerator: Map<Map<Variable, Int>, T>, denominator: Map<Map<Variable, Int>, T>) : this(
-        LabeledPolynomial(numerator),
-        LabeledPolynomial(denominator)
+    constructor(numeratorCoefficients: Map<Map<Variable, Int>, T>, denominatorCoefficients: Map<Map<Variable, Int>, T>) : this(
+        LabeledPolynomial(numeratorCoefficients),
+        LabeledPolynomial(denominatorCoefficients)
     )
 
-    constructor(numerator: List<Pair<Map<Variable, Int>, T>>, denominator: List<Pair<Map<Variable, Int>, T>>) : this(
-        LabeledPolynomial(numerator.toMap()),
-        LabeledPolynomial(denominator.toMap())
+    constructor(numeratorCoefficients: Collection<Pair<Map<Variable, Int>, T>>, denominatorCoefficients: Collection<Pair<Map<Variable, Int>, T>>) : this(
+        LabeledPolynomial(numeratorCoefficients),
+        LabeledPolynomial(denominatorCoefficients)
     )
 
     constructor(numerator: LabeledPolynomial<T>) : this(numerator, numerator.getOne())
-    constructor(numerator: Map<Map<Variable, Int>, T>) : this(
-        LabeledPolynomial(numerator)
+    constructor(numeratorCoefficients: Map<Map<Variable, Int>, T>) : this(
+        LabeledPolynomial(numeratorCoefficients)
     )
 
-    constructor(numerator: List<Pair<Map<Variable, Int>, T>>) : this(
-        LabeledPolynomial(numerator.toMap())
+    constructor(numeratorCoefficients: Collection<Pair<Map<Variable, Int>, T>>) : this(
+        LabeledPolynomial(numeratorCoefficients)
     )
     // TODO: Think about other constructors
 

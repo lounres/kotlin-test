@@ -3,8 +3,14 @@ package math.polynomials
 import math.ringsAndFields.*
 
 
-class UnivariateRationalFunction<T: Ring<T>> (val numerator: UnivariatePolynomial<T>, val denominator: UnivariatePolynomial<T>) : Field<UnivariateRationalFunction<T>> {
+class UnivariateRationalFunction<T: Ring<T>> (
+    val numerator: UnivariatePolynomial<T>,
+    val denominator: UnivariatePolynomial<T>
+) : Field<UnivariateRationalFunction<T>> {
     init { if (denominator.isZero()) throw ArithmeticException("/ by zero") }
+
+    operator fun component1(): UnivariatePolynomial<T> = numerator
+    operator fun component2(): UnivariatePolynomial<T> = denominator
 
     val numeratorDegree get() = numerator.degree
     val denominatorDegree get() = denominator.degree

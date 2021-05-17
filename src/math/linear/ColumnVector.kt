@@ -79,7 +79,7 @@ class ColumnVector<T: Ring<T>> internal constructor(
         ColumnVector(countOfRows) { index -> coefficients[index][0] * other }
 
     operator fun get(rowIndex: Int) : T =
-        if (rowIndex !in 0 until countOfRows) throw Companion.MatrixIndexOutOfBoundsException("Row index out of bounds: $rowIndex got, in 0..${countOfRows - 1} expected")
+        if (rowIndex !in 0 until countOfRows) throw IndexOutOfBoundsException("Row index out of bounds: $rowIndex got, in 0..${countOfRows - 1} expected")
         else coefficients[rowIndex][0]
 
     override fun transposed(): RowVector<T> =

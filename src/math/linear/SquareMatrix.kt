@@ -8,7 +8,7 @@ class SquareMatrix<T: Ring<T>> internal constructor(
     countOfRows: Int,
     coefficients: List<List<T>>,
     toCheckInput: Boolean = true
-): Matrix<T>(countOfRows, countOfRows, coefficients, toCheckInput) {
+): Ring<SquareMatrix<T>>, Matrix<T>(countOfRows, countOfRows, coefficients, toCheckInput) {
     val determinant: T by lazy {
         fun computeMinor(index: Int, freeIndices: SortedSet<Int>): T {
             if (index == countOfRows - 1) return coefficients[index][freeIndices.first()]
@@ -52,12 +52,33 @@ class SquareMatrix<T: Ring<T>> internal constructor(
         toCheckInput = false
     )
 
-    override operator fun unaryPlus(): Matrix<T> = this
+//    /**
+//     * Returns the zero (the additive identity) of the ring.
+//     *
+//     * It's recommended to create static ring with the zero in inheritor and return it by the method.
+//     */
+    override fun getZero(): SquareMatrix<T> = SquareMatrix(countOfRows) { _, _ -> ringZero }
+//    /**
+//     * Returns the one (the multiplicative identity) of the ring.
+//     *
+//     * It's recommended to create static ring with the onr in inheritor and return it by the method.
+//     */
+    override fun getOne(): SquareMatrix<T> = SquareMatrix(countOfRows) { rowIndex, columnIndex -> if(rowIndex == columnIndex) ringOne else ringZero }
+//    /**
+//     * Checks if the instant is the zero (the additive identity) of the ring.
+//     */
+    override fun isZero(): Boolean = all { it.isZero() }
+//    /**
+//     * Checks if the instant is the one (the multiplicative identity) of the ring.
+//     */
+    override fun isOne(): Boolean = allIndexed { rowIndex, columnIndex, t -> if (rowIndex == columnIndex) t.isOne() else t.isZero() }
 
-    override operator fun unaryMinus(): Matrix<T> =
-        Matrix(countOfRows, countOfColumns) { rowIndex, columnIndex -> -coefficients[rowIndex][columnIndex] }
+    override operator fun unaryPlus(): SquareMatrix<T> = this
 
-    /*override*/ operator fun plus(other: SquareMatrix<T>): SquareMatrix<T> =
+    override operator fun unaryMinus(): SquareMatrix<T> =
+        SquareMatrix(countOfRows) { rowIndex, columnIndex -> -coefficients[rowIndex][columnIndex] }
+
+    override operator fun plus(other: SquareMatrix<T>): SquareMatrix<T> =
         if (countOfRows != other.countOfRows) throw IllegalArgumentException("Can not add two square matrices of different sizes")
         else
             SquareMatrix(
@@ -71,7 +92,7 @@ class SquareMatrix<T: Ring<T>> internal constructor(
                 toCheckInput = false
             )
 
-    /*override*/ operator fun minus(other: SquareMatrix<T>): SquareMatrix<T> =
+    override operator fun minus(other: SquareMatrix<T>): SquareMatrix<T> =
         if (countOfRows != other.countOfRows) throw IllegalArgumentException("Can not subtract two square matrices of different sizes")
         else
             SquareMatrix(
@@ -85,7 +106,7 @@ class SquareMatrix<T: Ring<T>> internal constructor(
                 toCheckInput = false
             )
 
-    /*override*/ operator fun times(other: SquareMatrix<T>): SquareMatrix<T> =
+    override operator fun times(other: SquareMatrix<T>): SquareMatrix<T> =
         if (countOfColumns != other.countOfRows) throw IllegalArgumentException("Can not multiply two square matrices of different sizes")
         else
             SquareMatrix(
@@ -131,8 +152,8 @@ class SquareMatrix<T: Ring<T>> internal constructor(
 
     fun minorMatrix(rowIndex: Int, columnIndex: Int): SquareMatrix<T> =
         when {
-            rowIndex !in 0 until countOfRows -> throw Companion.MatrixIndexOutOfBoundsException("Row index out of bounds: $rowIndex got, in 0..${countOfRows-1} expected")
-            columnIndex !in 0 until countOfRows -> throw Companion.MatrixIndexOutOfBoundsException("Column index out of bounds: $columnIndex got, in 0..${countOfRows-1} expected")
+            rowIndex !in 0 until countOfRows -> throw IndexOutOfBoundsException("Row index out of bounds: $rowIndex got, in 0..${countOfRows-1} expected")
+            columnIndex !in 0 until countOfRows -> throw IndexOutOfBoundsException("Column index out of bounds: $columnIndex got, in 0..${countOfRows-1} expected")
             countOfRows == 1 -> throw IllegalArgumentException("Square matrix 1⨉1 can't provide minor matrices because of their sizes.")
             else ->
                 SquareMatrix(
@@ -145,8 +166,8 @@ class SquareMatrix<T: Ring<T>> internal constructor(
         }
 
     fun minor(rowIndex: Int, columnIndex: Int): T {
-        if (rowIndex !in 0 until countOfRows) throw Companion.MatrixIndexOutOfBoundsException("Row index out of bounds: $rowIndex got, in 0..${countOfRows-1} expected")
-        if (columnIndex !in 0 until countOfRows) throw Companion.MatrixIndexOutOfBoundsException("Column index out of bounds: $columnIndex got, in 0..${countOfRows-1} expected")
+        if (rowIndex !in 0 until countOfRows) throw IndexOutOfBoundsException("Row index out of bounds: $rowIndex got, in 0..${countOfRows-1} expected")
+        if (columnIndex !in 0 until countOfRows) throw IndexOutOfBoundsException("Column index out of bounds: $columnIndex got, in 0..${countOfRows-1} expected")
         if (countOfRows == 1) return ringOne
 
         val rowIndices = (0 until countOfRows).toMutableList().apply { remove(rowIndex) }
