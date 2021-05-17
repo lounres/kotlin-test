@@ -82,14 +82,27 @@ operator fun <T: Ring<T>> Long.times(other: SquareMatrix<T>): SquareMatrix<T> =
  * Returns a matrix containing the results of applying the given [transform] function
  * to each element in the original matrix.
  */
-fun <T: Ring<T>, S: Ring<S>> SquareMatrix<T>.map(transform: (T) -> S): SquareMatrix<S> =
+fun <T: Ring<T>, S: Ring<S>> SquareMatrix<T>.mapMatrix(transform: (T) -> S): SquareMatrix<S> =
     SquareMatrix(countOfRows) { rowIndex, columnIndex -> transform(coefficients[rowIndex][columnIndex]) }
 
 /**
  * Returns a matrix containing the results of applying the given [transform] function
  * to each element in the original matrix.
  */
-fun <T: Ring<T>, S: Ring<S>> SquareMatrix<T>.mapIndexed(transform: (rowIndex: Int, columnIndex: Int, T) -> S): SquareMatrix<S> =
+fun <T: Ring<T>, S: Ring<S>> SquareMatrix<T>.mapMatrixIndexed(transform: (rowIndex: Int, columnIndex: Int, T) -> S): SquareMatrix<S> =
     SquareMatrix(countOfRows) { rowIndex, columnIndex -> transform(rowIndex, columnIndex, coefficients[rowIndex][columnIndex]) }
+
+///**
+// * Performs the given [action] on each element and returns the collection itself afterwards.
+// */
+/*inline*/ fun <T: Ring<T>> SquareMatrix<T>.onMatrixEach(action: (T) -> Unit): Matrix<T> = apply { forMatrixEach(action) }
+
+///**
+// * Performs the given [action] on each element, providing sequential index with the element,
+// * and returns the collection itself afterwards.
+// * @param [action] function that takes the index of an element and the element itself
+// * and performs the action on the element.
+// */
+/*inline*/ fun <T: Ring<T>> SquareMatrix<T>.onMatrixEachIndexed(action: (rowIndex: Int, columnIndex: Int, T) -> Unit): Matrix<T> = apply { forMatrixEachIndexed(action) }
 
 // endregion

@@ -146,70 +146,70 @@ fun <T: Ring<T>> Matrix<T>.getOrNull(index: MatrixIndex): T? =
 ///**
 // * Returns an element at the given [index] or throws an [IndexOutOfBoundsException] if the [index] is out of bounds of this list.
 // */
-fun <T: Ring<T>> Matrix<T>.elementAt(rowIndex: Int, columnIndex: Int): T = get(rowIndex, columnIndex)
+fun <T: Ring<T>> Matrix<T>.elementMatrixAt(rowIndex: Int, columnIndex: Int): T = get(rowIndex, columnIndex)
 
 ///**
 // * Returns an element at the given [index] or throws an [IndexOutOfBoundsException] if the [index] is out of bounds of this list.
 // */
-fun <T: Ring<T>> Matrix<T>.elementAt(index: Pair<Int, Int>): T = get(index)
+fun <T: Ring<T>> Matrix<T>.elementMatrixAt(index: Pair<Int, Int>): T = get(index)
 
 ///**
 // * Returns an element at the given [index] or throws an [IndexOutOfBoundsException] if the [index] is out of bounds of this list.
 // */
-fun <T: Ring<T>> Matrix<T>.elementAt(index: MatrixIndex): T = get(index)
+fun <T: Ring<T>> Matrix<T>.elementMatrixAt(index: MatrixIndex): T = get(index)
 
 ///**
 // * Returns an element at the given [index] or the result of calling the [defaultValue] function if the [index] is out of bounds of this list.
 // */
-/*inline*/ fun <T: Ring<T>> Matrix<T>.elementAtOrElse(rowIndex: Int, columnIndex: Int, defaultValue: (Int, Int) -> T): T =
+/*inline*/ fun <T: Ring<T>> Matrix<T>.elementMatrixAtOrElse(rowIndex: Int, columnIndex: Int, defaultValue: (Int, Int) -> T): T =
     getOrElse(rowIndex, columnIndex, defaultValue)
 
 ///**
 // * Returns an element at the given [index] or the result of calling the [defaultValue] function if the [index] is out of bounds of this list.
 // */
-/*inline*/ fun <T: Ring<T>> Matrix<T>.elementAtOrElse(index: Pair<Int, Int>, defaultValue: (Pair<Int, Int>) -> T): T =
+/*inline*/ fun <T: Ring<T>> Matrix<T>.elementMatrixAtOrElse(index: Pair<Int, Int>, defaultValue: (Pair<Int, Int>) -> T): T =
     getOrElse(index, defaultValue)
 
 ///**
 // * Returns an element at the given [index] or the result of calling the [defaultValue] function if the [index] is out of bounds of this list.
 // */
-/*inline*/ fun <T: Ring<T>> Matrix<T>.elementAtOrElse(index: MatrixIndex, defaultValue: (MatrixIndex) -> T): T =
+/*inline*/ fun <T: Ring<T>> Matrix<T>.elementMatrixAtOrElse(index: MatrixIndex, defaultValue: (MatrixIndex) -> T): T =
     getOrElse(index, defaultValue)
 
 ///**
 // * Returns an element at the given [index] or `null` if the [index] is out of bounds of this list.
 // */
-fun <T: Ring<T>> Matrix<T>.elementAtOrNull(rowIndex: Int, columnIndex: Int): T? = getOrNull(rowIndex, columnIndex)
+fun <T: Ring<T>> Matrix<T>.elementMatrixAtOrNull(rowIndex: Int, columnIndex: Int): T? = getOrNull(rowIndex, columnIndex)
 
 ///**
 // * Returns an element at the given [index] or `null` if the [index] is out of bounds of this list.
 // */
-fun <T: Ring<T>> Matrix<T>.elementAtOrNull(index: Pair<Int, Int>): T? = getOrNull(index)
+fun <T: Ring<T>> Matrix<T>.elementMatrixAtOrNull(index: Pair<Int, Int>): T? = getOrNull(index)
 
 ///**
 // * Returns an element at the given [index] or `null` if the [index] is out of bounds of this list.
 // */
-fun <T: Ring<T>> Matrix<T>.elementAtOrNull(index: MatrixIndex): T? = getOrNull(index)
+fun <T: Ring<T>> Matrix<T>.elementMatrixAtOrNull(index: MatrixIndex): T? = getOrNull(index)
 
 /**
  * Returns a matrix containing the results of applying the given [transform] function
  * to each element in the original matrix.
  */
-fun <T: Ring<T>, S: Ring<S>> Matrix<T>.map(transform: (T) -> S): Matrix<S> =
+fun <T: Ring<T>, S: Ring<S>> Matrix<T>.mapMatrix(transform: (T) -> S): Matrix<S> =
     Matrix(countOfRows, countOfColumns) { rowIndex, columnIndex -> transform(coefficients[rowIndex][columnIndex]) }
 
 /**
  * Returns a matrix containing the results of applying the given [transform] function
  * to each element in the original matrix.
  */
-fun <T: Ring<T>, S: Ring<S>> Matrix<T>.mapIndexed(transform: (rowIndex: Int, columnIndex: Int, T) -> S): Matrix<S> =
+fun <T: Ring<T>, S: Ring<S>> Matrix<T>.mapMatrixIndexed(transform: (rowIndex: Int, columnIndex: Int, T) -> S): Matrix<S> =
     Matrix(countOfRows, countOfColumns) { rowIndex, columnIndex -> transform(rowIndex, columnIndex, coefficients[rowIndex][columnIndex]) }
 
 ///**
 // * Returns a lazy [Iterable] that wraps each element of the original collection
 // * into an [IndexedValue] containing the index of that element and the element itself.
 // */
-fun <T: Ring<T>> Matrix<T>.withIndex(): Iterable<IndexedMatrixValue<T>> =
+fun <T: Ring<T>> Matrix<T>.withMatrixIndex(): Iterable<IndexedMatrixValue<T>> =
     object : Iterable<IndexedMatrixValue<T>> {
         override fun iterator(): Iterator<IndexedMatrixValue<T>> =
             object : Iterator<IndexedMatrixValue<T>> {
@@ -238,7 +238,7 @@ fun <T: Ring<T>> Matrix<T>.withIndex(): Iterable<IndexedMatrixValue<T>> =
 ///**
 // * Returns `true` if all elements match the given [predicate].
 // */
-/*inline*/ fun <T: Ring<T>> Matrix<T>.all(predicate: (T) -> Boolean): Boolean {
+/*inline*/ fun <T: Ring<T>> Matrix<T>.allMatrix(predicate: (T) -> Boolean): Boolean {
     for (element in this) if (!predicate(element)) return false
     return true
 }
@@ -246,15 +246,15 @@ fun <T: Ring<T>> Matrix<T>.withIndex(): Iterable<IndexedMatrixValue<T>> =
 ///**
 // * Returns `true` if all elements match the given [predicate].
 // */
-/*inline*/ fun <T: Ring<T>> Matrix<T>.allIndexed(predicate: (rowIndex: Int, columnIndex: Int, T) -> Boolean): Boolean {
-    for ((index, element) in this.withIndex()) if (!predicate(index.rowIndex, index.columnIndex, element)) return false
+/*inline*/ fun <T: Ring<T>> Matrix<T>.allMatrixIndexed(predicate: (rowIndex: Int, columnIndex: Int, T) -> Boolean): Boolean {
+    for ((index, element) in this.withMatrixIndex()) if (!predicate(index.rowIndex, index.columnIndex, element)) return false
     return true
 }
 
 ///**
 // * Returns `true` if at least one element matches the given [predicate].
 // */
-/*inline*/ fun <T: Ring<T>> Matrix<T>.any(predicate: (T) -> Boolean): Boolean {
+/*inline*/ fun <T: Ring<T>> Matrix<T>.anyMatrix(predicate: (T) -> Boolean): Boolean {
     for (element in this) if (predicate(element)) return true
     return false
 }
@@ -262,8 +262,8 @@ fun <T: Ring<T>> Matrix<T>.withIndex(): Iterable<IndexedMatrixValue<T>> =
 ///**
 // * Returns `true` if at least one element matches the given [predicate].
 // */
-/*inline*/ fun <T: Ring<T>> Matrix<T>.anyIndexed(predicate: (rowIndex: Int, columnIndex: Int, T) -> Boolean): Boolean {
-    for ((index, element) in this.withIndex()) if (predicate(index.rowIndex, index.columnIndex, element)) return true
+/*inline*/ fun <T: Ring<T>> Matrix<T>.anyMatrixIndexed(predicate: (rowIndex: Int, columnIndex: Int, T) -> Boolean): Boolean {
+    for ((index, element) in this.withMatrixIndex()) if (predicate(index.rowIndex, index.columnIndex, element)) return true
     return false
 }
 
@@ -275,7 +275,7 @@ fun <T: Ring<T>> Matrix<T>.withIndex(): Iterable<IndexedMatrixValue<T>> =
 // *
 // * @param [operation] function that takes current accumulator value and an element, and calculates the next accumulator value.
 // */
-/*inline*/ fun <T: Ring<T>, R> Matrix<T>.fold(initial: R, operation: (acc: R, T) -> R): R {
+/*inline*/ fun <T: Ring<T>, R> Matrix<T>.foldMatrix(initial: R, operation: (acc: R, T) -> R): R {
     var accumulator = initial
     for (element in this) accumulator = operation(accumulator, element)
     return accumulator
@@ -290,16 +290,16 @@ fun <T: Ring<T>> Matrix<T>.withIndex(): Iterable<IndexedMatrixValue<T>> =
 // * @param [operation] function that takes the index of an element, current accumulator value
 // * and the element itself, and calculates the next accumulator value.
 // */
-/*inline*/ fun <T: Ring<T>, R> Matrix<T>.foldIndexed(initial: R, operation: (rowIndex: Int, columnIndex: Int, acc: R, T) -> R): R {
+/*inline*/ fun <T: Ring<T>, R> Matrix<T>.foldMatrixIndexed(initial: R, operation: (rowIndex: Int, columnIndex: Int, acc: R, T) -> R): R {
     var accumulator = initial
-    for ((index, element) in this.withIndex()) accumulator = operation(index.rowIndex, index.columnIndex, accumulator, element)
+    for ((index, element) in this.withMatrixIndex()) accumulator = operation(index.rowIndex, index.columnIndex, accumulator, element)
     return accumulator
 }
 
 ///**
 // * Performs the given [action] on each element.
 // */
-/*inline*/ fun <T: Ring<T>> Matrix<T>.forEach(action: (T) -> Unit) {
+/*inline*/ fun <T: Ring<T>> Matrix<T>.forMatrixEach(action: (T) -> Unit) {
     for (element in this) action(element)
 }
 
@@ -308,14 +308,14 @@ fun <T: Ring<T>> Matrix<T>.withIndex(): Iterable<IndexedMatrixValue<T>> =
 // * @param [action] function that takes the index of an element and the element itself
 // * and performs the action on the element.
 // */
-/*inline*/ fun <T: Ring<T>> Matrix<T>.forEachIndexed(action: (rowIndex: Int, columnIndex: Int, T) -> Unit) {
-    for ((index, item) in this.withIndex()) action(index.rowIndex, index.columnIndex, item)
+/*inline*/ fun <T: Ring<T>> Matrix<T>.forMatrixEachIndexed(action: (rowIndex: Int, columnIndex: Int, T) -> Unit) {
+    for ((index, item) in this.withMatrixIndex()) action(index.rowIndex, index.columnIndex, item)
 }
 
 ///**
 // * Performs the given [action] on each element and returns the collection itself afterwards.
 // */
-/*inline*/ fun <T: Ring<T>> Matrix<T>.onEach(action: (T) -> Unit): Matrix<T> = apply { for (element in this) action(element) }
+/*inline*/ fun <T: Ring<T>> Matrix<T>.onMatrixEach(action: (T) -> Unit): Matrix<T> = apply { forMatrixEach(action) }
 
 ///**
 // * Performs the given [action] on each element, providing sequential index with the element,
@@ -323,6 +323,6 @@ fun <T: Ring<T>> Matrix<T>.withIndex(): Iterable<IndexedMatrixValue<T>> =
 // * @param [action] function that takes the index of an element and the element itself
 // * and performs the action on the element.
 // */
-/*inline*/ fun <T: Ring<T>> Matrix<T>.onEachIndexed(action: (rowIndex: Int, columnIndex: Int, T) -> Unit): Matrix<T> = apply { forEachIndexed(action) }
+/*inline*/ fun <T: Ring<T>> Matrix<T>.onMatrixEachIndexed(action: (rowIndex: Int, columnIndex: Int, T) -> Unit): Matrix<T> = apply { forMatrixEachIndexed(action) }
 
 // endregion

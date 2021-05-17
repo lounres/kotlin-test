@@ -67,11 +67,11 @@ class SquareMatrix<T: Ring<T>> internal constructor(
 //    /**
 //     * Checks if the instant is the zero (the additive identity) of the ring.
 //     */
-    override fun isZero(): Boolean = all { it.isZero() }
+    override fun isZero(): Boolean = allMatrix { it.isZero() }
 //    /**
 //     * Checks if the instant is the one (the multiplicative identity) of the ring.
 //     */
-    override fun isOne(): Boolean = allIndexed { rowIndex, columnIndex, t -> if (rowIndex == columnIndex) t.isOne() else t.isZero() }
+    override fun isOne(): Boolean = allMatrixIndexed { rowIndex, columnIndex, t -> if (rowIndex == columnIndex) t.isOne() else t.isZero() }
 
     override operator fun unaryPlus(): SquareMatrix<T> = this
 
