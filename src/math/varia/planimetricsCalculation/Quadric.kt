@@ -22,7 +22,7 @@ data class Quadric (
         Variable(name + "_yz").toLabeledPolynomial(1.toRational())
     )
     constructor(matrix: SquareMatrix<LabeledPolynomial<Rational>>) : this(
-        xx = matrix[0, 0],
+        xx = matrix[0, 0].also { if (matrix.countOfRows != 3) throw IllegalArgumentException("Defining matrix should have sizes 3×3.")},
         yy = matrix[1, 1],
         zz = matrix[2, 2],
         xy = 2 * matrix[0, 1].also { if (matrix[1, 0] != it) throw IllegalArgumentException("Defining matrix should be symmetric.") },
