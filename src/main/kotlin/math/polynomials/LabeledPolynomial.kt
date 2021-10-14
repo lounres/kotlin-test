@@ -827,23 +827,20 @@ internal constructor(
         /**
          * Comparator for lexicographic comparison of monomials.
          */
-        val monomialComparator =
-            object : Comparator<Map<Variable, Int>> {
-                override fun compare(o1: Map<Variable, Int>?, o2: Map<Variable, Int>?): Int {
-                    if (o1 == o2) return 0
-                    if (o1 == null) return 1
-                    if (o2 == null) return -1
+        val monomialComparator = Comparator { o1: Map<Variable, Int>?, o2: Map<Variable, Int>? ->
+            if (o1 == o2) return@Comparator 0
+            if (o1 == null) return@Comparator 1
+            if (o2 == null) return@Comparator -1
 
-                    val commonVariables = (o1.keys union o2.keys).sorted()
+            val commonVariables = (o1.keys union o2.keys).sorted()
 
-                    for (variable in commonVariables) {
-                        if (o1.getOrDefault(variable, 0) > o2.getOrDefault(variable, 0)) return -1
-                        if (o1.getOrDefault(variable, 0) < o2.getOrDefault(variable, 0)) return 1
-                    }
-
-                    return 0
-                }
+            for (variable in commonVariables) {
+                if (o1.getOrDefault(variable, 0) > o2.getOrDefault(variable, 0)) return@Comparator -1
+                if (o1.getOrDefault(variable, 0) < o2.getOrDefault(variable, 0)) return@Comparator 1
             }
+
+            return@Comparator 0
+        }
 
         /**
          * Represents result of division with remainder.

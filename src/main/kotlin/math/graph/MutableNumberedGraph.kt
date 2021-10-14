@@ -2,9 +2,10 @@ package math.graph
 
 import math.ringsAndFields.*
 import math.linear.*
+import kotlin.properties.Delegates
 
 
-class NumberedGraph {
+class MutableNumberedGraph {
     val countOfVertices: Int
     val edges: Set<Pair<Int, Int>>
     val adjacentVertices: List<Set<Int>>
