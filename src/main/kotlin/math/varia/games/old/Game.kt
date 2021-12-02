@@ -1,4 +1,4 @@
-package math.varia.games
+package math.varia.games.old
 
 /**
  * ## Game interface.

@@ -1,4 +1,4 @@
-package math.varia.games
+package math.varia.games.old
 
 class GameSum(vararg games: Game): Game {
     override lateinit var supergame: Game

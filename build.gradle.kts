@@ -2,14 +2,14 @@ val kotlin_version: String by project
 
 plugins {
     application
-    kotlin("jvm") version "1.5.31"
-    id("org.jetbrains.dokka") version "1.5.30"
+    kotlin("jvm") version "1.6.0"
+    id("org.jetbrains.dokka") version "1.6.0"
 }
 
 group = "com.lounres"
 version = "0.0.1"
 application {
-    mainClass.set("Main")
+    mainClass.set("MainKt")
 }
 
 repositories {

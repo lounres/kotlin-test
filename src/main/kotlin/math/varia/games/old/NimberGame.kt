@@ -1,4 +1,4 @@
-package math.varia.games
+package math.varia.games.old
 
 class NimberGame(var count: Int): Game {
     override lateinit var supergame: Game

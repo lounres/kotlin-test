@@ -1,4 +1,4 @@
-package math.varia.games
+package math.varia.games.old
 
 class GameUnion(vararg games: Game): Game {
     override lateinit var supergame: Game
@@ -52,7 +52,8 @@ class GameUnion(vararg games: Game): Game {
                     return arrayListOf(this as Game to game as Any)
                 }
             }
-            throw Error("Have not found in GameSum nimber to decrease and get $to from $currentNimber:\n${subgames.map(Game::getNimber)}")
+            throw Error("Have not found in GameSum nimber to decrease and get $to from $currentNimber:\n${subgames.map(
+                Game::getNimber)}")
         } else {
             val res = arrayListOf(this as Game to chosenSubgame!! as Any)
             res.addAll(chosenSubgame!!.getTurnTo(to))

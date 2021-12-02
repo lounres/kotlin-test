@@ -1,4 +1,4 @@
-package math.varia.games
+package math.varia.games.old
 
 fun mex(vararg nums: Int): Int {
     var res = 0
