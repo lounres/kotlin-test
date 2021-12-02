@@ -54,6 +54,8 @@ open class Matrix<T: Ring<T>> internal constructor(
         fromRow
     }
 
+    val size: Int get() = countOfRows * countOfColumns
+    val sizes: Pair<Int, Int> get() = Pair(countOfRows, countOfColumns)
     val rowIndices : Iterable<Int> get() = 0 until countOfRows
     val columnIndices : Iterable<Int> get() = 0 until countOfColumns
     val indices: List<MatrixIndex>

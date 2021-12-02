@@ -18,7 +18,7 @@ fun <T: Field<T>> SquareMatrix<T>.reciprocalOrNull(): SquareMatrix<T>? {
     val ONE = ringOne
     val resultCoefficients = MutableList(countOfRows) { rowIndex -> MutableList(countOfRows) { columnIndex -> if (rowIndex == columnIndex) ONE else ZERO} }
 
-    for  (columnNow in 0 until countOfColumns) {
+    for (columnNow in 0 until countOfColumns) {
         var coolRow = coefficients2.asSequence().drop(columnNow).indexOfFirst { it[columnNow].isNotZero() }
         if (coolRow == -1) return null
 
@@ -31,15 +31,15 @@ fun <T: Field<T>> SquareMatrix<T>.reciprocalOrNull(): SquareMatrix<T>? {
 
         val coolCoef = coefficients2[columnNow][columnNow]
 
-        for (col in 0 .. coefficients2.lastIndex) {
+        for (col in 0 until countOfColumns) {
             coefficients2[columnNow][col] /= coolCoef
             resultCoefficients[columnNow][col] /= coolCoef
         }
 
-        for (row in 0 .. coefficients2.lastIndex) {
+        for (row in 0 until countOfRows) {
             if (row == columnNow) continue
             val rowCoef = coefficients2[row][columnNow]
-            for (col in 0 .. coefficients2.lastIndex) {
+            for (col in 0 until countOfColumns) {
                 coefficients2[row][col] = coefficients2[row][col] - coefficients2[columnNow][col] * rowCoef
                 resultCoefficients[row][col] = resultCoefficients[row][col] - resultCoefficients[columnNow][col] * rowCoef
             }
@@ -82,20 +82,20 @@ operator fun <T: Ring<T>> Long.times(other: SquareMatrix<T>): SquareMatrix<T> =
  * Returns a matrix containing the results of applying the given [transform] function
  * to each element in the original matrix.
  */
-fun <T: Ring<T>, S: Ring<S>> SquareMatrix<T>.mapMatrix(transform: (T) -> S): SquareMatrix<S> =
+inline fun <T: Ring<T>, S: Ring<S>> SquareMatrix<T>.mapMatrix(crossinline transform: (T) -> S): SquareMatrix<S> =
     SquareMatrix(countOfRows) { rowIndex, columnIndex -> transform(coefficients[rowIndex][columnIndex]) }
 
 /**
  * Returns a matrix containing the results of applying the given [transform] function
  * to each element in the original matrix.
  */
-fun <T: Ring<T>, S: Ring<S>> SquareMatrix<T>.mapMatrixIndexed(transform: (rowIndex: Int, columnIndex: Int, T) -> S): SquareMatrix<S> =
+inline fun <T: Ring<T>, S: Ring<S>> SquareMatrix<T>.mapMatrixIndexed(crossinline transform: (rowIndex: Int, columnIndex: Int, T) -> S): SquareMatrix<S> =
     SquareMatrix(countOfRows) { rowIndex, columnIndex -> transform(rowIndex, columnIndex, coefficients[rowIndex][columnIndex]) }
 
 ///**
 // * Performs the given [action] on each element and returns the collection itself afterwards.
 // */
-/*inline*/ fun <T: Ring<T>> SquareMatrix<T>.onMatrixEach(action: (T) -> Unit): Matrix<T> = apply { forMatrixEach(action) }
+inline fun <T: Ring<T>> SquareMatrix<T>.onMatrixEach(action: (T) -> Unit): Matrix<T> = apply { forMatrixEach(action) }
 
 ///**
 // * Performs the given [action] on each element, providing sequential index with the element,
@@ -103,6 +103,6 @@ fun <T: Ring<T>, S: Ring<S>> SquareMatrix<T>.mapMatrixIndexed(transform: (rowInd
 // * @param [action] function that takes the index of an element and the element itself
 // * and performs the action on the element.
 // */
-/*inline*/ fun <T: Ring<T>> SquareMatrix<T>.onMatrixEachIndexed(action: (rowIndex: Int, columnIndex: Int, T) -> Unit): Matrix<T> = apply { forMatrixEachIndexed(action) }
+inline fun <T: Ring<T>> SquareMatrix<T>.onMatrixEachIndexed(action: (rowIndex: Int, columnIndex: Int, T) -> Unit): Matrix<T> = apply { forMatrixEachIndexed(action) }
 
 // endregion
