@@ -15,9 +15,9 @@ class LabeledRationalFunction<T : Ring<T>>(
     val degree by lazy { numerator.degree - denominator.degree }
     val variables by lazy { numerator.variables union denominator.variables }
     val degrees by lazy {
-        variables.map {
-            it to numerator.degrees.getOrDefault(it, 0) - denominator.degrees.getOrDefault(it, 0)
-        }.toMap()
+        variables.associateWith {
+            numerator.degrees.getOrDefault(it, 0) - denominator.degrees.getOrDefault(it, 0)
+        }
     }
     val countOfVariables by lazy { variables.size }
 
