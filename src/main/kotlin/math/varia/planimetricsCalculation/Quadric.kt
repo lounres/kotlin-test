@@ -3,6 +3,7 @@ package math.varia.planimetricsCalculation
 import math.ringsAndFields.*
 import math.polynomials.*
 import math.linear.*
+import kotlin.reflect.KProperty
 
 
 data class Quadric (
@@ -65,5 +66,9 @@ data class Quadric (
         result = 31 * result + xz.hashCode()
         result = 31 * result + yz.hashCode()
         return result
+    }
+
+    companion object {
+        operator fun getValue(thisRef: Any?, property: KProperty<*>) : Quadric = Quadric(property.name)
     }
 }

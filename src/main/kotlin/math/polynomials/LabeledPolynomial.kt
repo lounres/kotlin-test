@@ -8,7 +8,7 @@ import kotlin.math.max
  * Represents multivariate polynomials with labeled variables.
  *
  * @param T Ring in which the polynomial is considered.
- * @param coefs Coefficients of the instants.
+ * @param coefs Coefficients of the instant.
  * @param toCheckInput If it's `true` cleaning of [coefficients] is executed otherwise it is not.
  *
  * @constructor Gets the coefficients in format of [coefficients] field and cleans it: removes zero degrees from keys of

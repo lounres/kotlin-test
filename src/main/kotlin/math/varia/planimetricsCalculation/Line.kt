@@ -3,6 +3,7 @@ package math.varia.planimetricsCalculation
 import math.ringsAndFields.*
 import math.polynomials.*
 import math.linear.*
+import kotlin.reflect.KProperty
 
 /**
  * Stores Line on projective plane as triplet of coefficients of its equation. The coefficients are determined with
@@ -81,4 +82,8 @@ data class Line (
      * Trivial hash code generator.
      */
     override fun hashCode(): Int = 1
+
+    companion object {
+        operator fun getValue(thisRef: Any?, property: KProperty<*>) : Line = Line(property.name)
+    }
 }

@@ -1,6 +1,7 @@
 package math.polynomials
 
 import math.ringsAndFields.*
+import kotlin.reflect.*
 
 
 /**
@@ -20,9 +21,7 @@ fun <T: Ring<T>> Variable.toLabeledRationalFunction(c: T): LabeledRationalFuncti
     )
 
 // region Operator extensions
-/**
- *
- */
+// TODO: Docs
 operator fun <T: Ring<T>> Variable.plus(other: T): LabeledPolynomial<T> = toLabeledPolynomial(other.getOne()) + other
 operator fun <T: Ring<T>> T.plus(other: Variable): LabeledPolynomial<T> = this + other.toLabeledPolynomial(getOne())
 operator fun <T: Ring<T>> Variable.plus(other: LabeledPolynomial<T>): LabeledPolynomial<T> = toLabeledPolynomial(other.ringOne) + other

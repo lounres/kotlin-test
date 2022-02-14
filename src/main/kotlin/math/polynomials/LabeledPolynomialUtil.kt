@@ -12,33 +12,30 @@ fun <T: Ring<T>> T.toLabeledPolynomial() = LabeledPolynomial(mapOf<Variable, Int
 // region Operator extensions
 
 // region Field case
-/**
- *
- */
+internal fun <T: Field<T>> Map<Map<Variable, Int>, T>.leadingTerm(variablesCollection: List<Variable>) : Pair<Map<Variable, Int>, T> =
+    asSequence()
+        .map { Pair(it.key, it.value) }
+        .reduce { (accDegs, accC), (listDegs, listC) ->
+            for (variable in variablesCollection) {
+                if (accDegs.getOrDefault(variable, 0) > listDegs.getOrDefault(variable, 0)) return@reduce accDegs to accC
+                if (accDegs.getOrDefault(variable, 0) < listDegs.getOrDefault(variable, 0)) return@reduce listDegs to listC
+            }
+            accDegs to accC
+        }
+
+// TODO: Docs
 operator fun <T: Field<T>> LabeledPolynomial<T>.div(other: LabeledPolynomial<T>): LabeledPolynomial<T> {
     if (other.isZero()) throw ArithmeticException("/ by zero")
     if (isZero()) return this
 
     val commonVariables = (variables union other.variables).sorted()
 
-    fun Map<Map<Variable, Int>, T>.leadingTerm() =
-        this
-            .asSequence()
-            .map { Pair(it.key, it.value) }
-            .reduce { (accDegs, accC), (listDegs, listC) ->
-                for (variable in commonVariables) {
-                    if (accDegs.getOrDefault(variable, 0) > listDegs.getOrDefault(variable, 0)) return@reduce accDegs to accC
-                    if (accDegs.getOrDefault(variable, 0) < listDegs.getOrDefault(variable, 0)) return@reduce listDegs to listC
-                }
-                accDegs to accC
-            }
-
     var thisCoefficients = coefficients.toMutableMap()
     val otherCoefficients = other.coefficients
     val quotientCoefficients = HashMap<Map<Variable, Int>, T>()
 
-    var (thisLeadingTermDegs, thisLeadingTermC) = thisCoefficients.leadingTerm()
-    val (otherLeadingTermDegs, otherLeadingTermC) = otherCoefficients.leadingTerm()
+    var (thisLeadingTermDegs, thisLeadingTermC) = thisCoefficients.leadingTerm(commonVariables)
+    val (otherLeadingTermDegs, otherLeadingTermC) = otherCoefficients.leadingTerm(commonVariables)
 
     while (
         thisLeadingTermDegs.size >= otherLeadingTermDegs.size &&
@@ -66,7 +63,7 @@ operator fun <T: Field<T>> LabeledPolynomial<T>.div(other: LabeledPolynomial<T>)
         if (thisCoefficients.isEmpty())
             return LabeledPolynomial(quotientCoefficients, toCheckInput = false)
 
-        val t = thisCoefficients.leadingTerm()
+        val t = thisCoefficients.leadingTerm(commonVariables)
         thisLeadingTermDegs = t.first
         thisLeadingTermC = t.second
     }
@@ -89,23 +86,11 @@ operator fun <T: Field<T>> LabeledPolynomial<T>.rem(other: LabeledPolynomial<T>)
 
     val commonVariables = (variables union other.variables).sorted()
 
-    fun Map<Map<Variable, Int>, T>.leadingTerm() =
-        this
-            .asSequence()
-            .map { Pair(it.key, it.value) }
-            .reduce { (accDegs, accC), (listDegs, listC) ->
-                for (variable in commonVariables) {
-                    if (accDegs.getOrDefault(variable, 0) > listDegs.getOrDefault(variable, 0)) return@reduce accDegs to accC
-                    if (accDegs.getOrDefault(variable, 0) < listDegs.getOrDefault(variable, 0)) return@reduce listDegs to listC
-                }
-                accDegs to accC
-            }
-
     var thisCoefficients = coefficients.toMutableMap()
     val otherCoefficients = other.coefficients
 
-    var (thisLeadingTermDegs, thisLeadingTermC) = thisCoefficients.leadingTerm()
-    val (otherLeadingTermDegs, otherLeadingTermC) = otherCoefficients.leadingTerm()
+    var (thisLeadingTermDegs, thisLeadingTermC) = thisCoefficients.leadingTerm(commonVariables)
+    val (otherLeadingTermDegs, otherLeadingTermC) = otherCoefficients.leadingTerm(commonVariables)
 
     while (
         thisLeadingTermDegs.size >= otherLeadingTermDegs.size &&
@@ -131,7 +116,7 @@ operator fun <T: Field<T>> LabeledPolynomial<T>.rem(other: LabeledPolynomial<T>)
         if (thisCoefficients.isEmpty())
             return LabeledPolynomial(thisCoefficients, toCheckInput = false)
 
-        val t = thisCoefficients.leadingTerm()
+        val t = thisCoefficients.leadingTerm(commonVariables)
         thisLeadingTermDegs = t.first
         thisLeadingTermC = t.second
     }
@@ -145,24 +130,12 @@ infix fun <T: Field<T>> LabeledPolynomial<T>.divrem(other: LabeledPolynomial<T>)
 
     val commonVariables = (variables union other.variables).sorted()
 
-    fun Map<Map<Variable, Int>, T>.leadingTerm() =
-        this
-            .asSequence()
-            .map { Pair(it.key, it.value) }
-            .reduce { (accDegs, accC), (listDegs, listC) ->
-                for (variable in commonVariables) {
-                    if (accDegs.getOrDefault(variable, 0) > listDegs.getOrDefault(variable, 0)) return@reduce accDegs to accC
-                    if (accDegs.getOrDefault(variable, 0) < listDegs.getOrDefault(variable, 0)) return@reduce listDegs to listC
-                }
-                accDegs to accC
-            }
-
     var thisCoefficients = coefficients.toMutableMap()
     val otherCoefficients = other.coefficients
     val quotientCoefficients = HashMap<Map<Variable, Int>, T>()
 
-    var (thisLeadingTermDegs, thisLeadingTermC) = thisCoefficients.leadingTerm()
-    val (otherLeadingTermDegs, otherLeadingTermC) = otherCoefficients.leadingTerm()
+    var (thisLeadingTermDegs, thisLeadingTermC) = thisCoefficients.leadingTerm(commonVariables)
+    val (otherLeadingTermDegs, otherLeadingTermC) = otherCoefficients.leadingTerm(commonVariables)
 
     while (
         thisLeadingTermDegs.size >= otherLeadingTermDegs.size &&
@@ -193,7 +166,7 @@ infix fun <T: Field<T>> LabeledPolynomial<T>.divrem(other: LabeledPolynomial<T>)
                 LabeledPolynomial(thisCoefficients, toCheckInput = false)
             )
 
-        val t = thisCoefficients.leadingTerm()
+        val t = thisCoefficients.leadingTerm(commonVariables)
         thisLeadingTermDegs = t.first
         thisLeadingTermC = t.second
     }

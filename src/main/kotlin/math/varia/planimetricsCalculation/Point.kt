@@ -3,6 +3,7 @@ package math.varia.planimetricsCalculation
 import math.ringsAndFields.*
 import math.polynomials.*
 import math.linear.*
+import kotlin.reflect.KProperty
 
 
 data class Point (
@@ -42,5 +43,9 @@ data class Point (
         result = 31 * result + y.hashCode()
         result = 31 * result + z.hashCode()
         return result
+    }
+
+    companion object {
+        operator fun getValue(thisRef: Any?, property: KProperty<*>) : Point = Point(property.name)
     }
 }

@@ -87,7 +87,7 @@ fun lagrangeSign(a: Int, p: Int): Int {
         if (orderOfPrime % 2 == 1) {
             if (primeDiv == 2) {
                 if (p % 8 !in setOf(1, 7)) result *= -1
-            } else result *= lagrangeSign(p, primeDiv) * if ((p - 1) * (primeDiv - 1) / 4 % 2 == 1) -1 else 1
+            } else result *= lagrangeSign(p, primeDiv).let { if ((p - 1) * (primeDiv - 1) / 4 % 2 == 1) -it else it }
         }
         primeDiv = findPrimeDivider(a, primeDiv + 1)
     }

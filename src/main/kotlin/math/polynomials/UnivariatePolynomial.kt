@@ -2,31 +2,19 @@ package math.polynomials
 
 import math.ringsAndFields.*
 import kotlin.math.*
+import kotlin.reflect.KProperty
 
-
-///**
-// * The class represents univariate polynomials.
-// *
-// * @property coefficients List containing coefficients of the polynomial.
-// *     In index `i` coefficient for `x^i` is stored.
-// *     **There may be zeros in the end of the list. But must be at least one coefficient.**
-// * @property degree Represents degree of the polynomial.
-// * @property ringExemplar Exemplar of the used field [T]. Used to get one and zero in the field or the field class.
-// */
-///**
-// * Represents univariate polynomials.
-// *
-// * @param T Ring in which the polynomial is considered.
-// * @param coefs Coefficients of the instants.
-// * @param toCheckInput If it's `true` cleaning of [coefficients] is executed otherwise it is not.
-// *
-// * @constructor Gets the coefficients in format of [coefficients] field and cleans it: removes zero degrees from end of
-// * received lists, sums up proportional monomials, removes zero monomials, and if result is empty map adds only element
-// * in it.
-// *
-// * @throws UnivariatePolynomialError If no coefficient received or if any of degrees in any monomial is negative.
-// */
-// TODO: Docs
+/**
+ * Represents multivariate polynomials with indexed variables.
+ *
+ * @param T Ring in which the polynomial is considered.
+ * @param coefs Coefficients of the instants.
+ *
+ * @constructor Cleans the received [coefficients]: removes zero degrees from end of received list, and if result is
+ * empty map adds only element in it.
+ *
+ * @throws UnivariatePolynomialError If no coefficient received or if any of degrees in any monomial is negative.
+ */
 class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add toCheckInput parameter. */ : Ring<UnivariatePolynomial<T>> {
     init { if (coefficients.isEmpty()) throw UnivariatePolynomialError("UnivariatePolynomial coefficients' list must not be empty") }
 
@@ -52,9 +40,21 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
     constructor(coefficients: List<T>, reverse: Boolean = false) : this(with(coefficients) { if (reverse) reversed() else this })
     constructor(vararg coefficients: T, reverse: Boolean = false) : this(coefficients.toList(), reverse)
 
+    /**
+     * Returns the zero polynomial (additive identity) over considered ring.
+     */
     override fun getZero(): UnivariatePolynomial<T> = UnivariatePolynomial(ringZero)
+    /**
+     * Returns the unit polynomial (multiplicative identity) over considered ring.
+     */
     override fun getOne(): UnivariatePolynomial<T> = UnivariatePolynomial(ringOne)
+    /**
+     * Checks if the instant is the zero polynomial (additive identity) over considered ring.
+     */
     override fun isZero(): Boolean = coefficients.all { it.isZero() }
+    /**
+     * Checks if the instant is the unit polynomial (multiplicative identity) over considered ring.
+     */
     override fun isOne(): Boolean = degree == 0 && coefficients.first().isOne()
 
     /**
@@ -74,14 +74,23 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
      */
     fun isNotNonZeroConstant(): Boolean = !isNonZeroConstant()
 
+    /**
+     * Returns the same polynomial.
+     */
     override operator fun unaryPlus(): UnivariatePolynomial<T> = this
 
+    /**
+     * Returns negation of the polynomial.
+     */
     override operator fun unaryMinus(): UnivariatePolynomial<T> =
         UnivariatePolynomial(
             coefficients
                 .map { -it }
         )
 
+    /**
+     * Returns sum of the polynomials.
+     */
     override operator fun plus(other: UnivariatePolynomial<T>): UnivariatePolynomial<T> =
         UnivariatePolynomial(
             (0..max(degree, other.degree))
@@ -95,11 +104,59 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
                 .ifEmpty { listOf(ringZero) }
         )
 
+    /**
+     * Returns sum of the polynomials. [other] is interpreted as [UnivariatePolynomial].
+     */
     operator fun plus(other: T): UnivariatePolynomial<T> =
         if (degree == -1) UnivariatePolynomial(other) else UnivariatePolynomial(
             listOf(coefficients[0] + other) + coefficients.subList(1, degree + 1)
         )
 
+    /**
+     * Returns sum of the polynomials. [other] is interpreted as [UnivariatePolynomial].
+     */
+    override operator fun plus(other: Integer): UnivariatePolynomial<T> =
+        if (other.isZero()) this
+        else
+            UnivariatePolynomial(
+                coefficients
+                    .toMutableList()
+                    .apply {
+                        this[0] += ringOne * other
+                    }
+            )
+
+    /**
+     * Returns sum of the polynomials. [other] is interpreted as [UnivariatePolynomial].
+     */
+    override operator fun plus(other: Int): UnivariatePolynomial<T> =
+        if (other == 0) this
+        else
+            UnivariatePolynomial(
+                coefficients
+                    .toMutableList()
+                    .apply {
+                        this[0] += ringOne * other
+                    }
+            )
+
+    /**
+     * Returns sum of the polynomials. [other] is interpreted as [UnivariatePolynomial].
+     */
+    override operator fun plus(other: Long): UnivariatePolynomial<T> =
+        if (other == 0L) this
+        else
+            UnivariatePolynomial(
+                coefficients
+                    .toMutableList()
+                    .apply {
+                        this[0] += ringOne * other
+                    }
+            )
+
+    /**
+     * Returns difference of the polynomials.
+     */
     override operator fun minus(other: UnivariatePolynomial<T>): UnivariatePolynomial<T> =
         UnivariatePolynomial(
             (0..max(degree, other.degree))
@@ -113,11 +170,59 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
                 .ifEmpty { listOf(ringZero) }
         )
 
+    /**
+     * Returns difference of the polynomials. [other] is interpreted as [UnivariatePolynomial].
+     */
     operator fun minus(other: T): UnivariatePolynomial<T> =
         if (degree == -1) UnivariatePolynomial(-other) else UnivariatePolynomial(
             listOf(coefficients[0] - other) + coefficients.subList(1, degree + 1)
         )
 
+    /**
+     * Returns difference of the polynomials. [other] is interpreted as [UnivariatePolynomial].
+     */
+    override operator fun minus(other: Integer): UnivariatePolynomial<T> =
+        if (other.isZero()) this
+        else
+            UnivariatePolynomial(
+                coefficients
+                    .toMutableList()
+                    .apply {
+                        this[0] -= ringOne * other
+                    }
+            )
+
+    /**
+     * Returns difference of the polynomials. [other] is interpreted as [UnivariatePolynomial].
+     */
+    override operator fun minus(other: Int): UnivariatePolynomial<T> =
+        if (other == 0) this
+        else
+            UnivariatePolynomial(
+                coefficients
+                    .toMutableList()
+                    .apply {
+                        this[0] -= ringOne * other
+                    }
+            )
+
+    /**
+     * Returns difference of the polynomials. [other] is interpreted as [UnivariatePolynomial].
+     */
+    override operator fun minus(other: Long): UnivariatePolynomial<T> =
+        if (other == 0L) this
+        else
+            UnivariatePolynomial(
+                coefficients
+                    .toMutableList()
+                    .apply {
+                        this[0] -= ringOne * other
+                    }
+            )
+
+    /**
+     * Returns product of the polynomials.
+     */
     override operator fun times(other: UnivariatePolynomial<T>): UnivariatePolynomial<T> =
         when {
             degree == -1 -> this
@@ -133,14 +238,18 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
                 )
         }
 
-
+    /**
+     * Returns product of the polynomials. [other] is interpreted as [UnivariatePolynomial].
+     */
     operator fun times(other: T): UnivariatePolynomial<T> =
         UnivariatePolynomial(
             coefficients
                 .subList(0, degree + 1)
                 .map { it * other }
         )
-
+    /**
+     * Returns product of the polynomials. [other] is interpreted as [UnivariatePolynomial].
+     */
     override operator fun times(other: Integer): UnivariatePolynomial<T> =
         UnivariatePolynomial(
             coefficients
@@ -148,6 +257,9 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
                 .map { it * other }
         )
 
+    /**
+     * Returns product of the polynomials. [other] is interpreted as [UnivariatePolynomial].
+     */
     override operator fun times(other: Int): UnivariatePolynomial<T> =
         UnivariatePolynomial(
             coefficients
@@ -155,6 +267,9 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
                 .map { it * other }
         )
 
+    /**
+     * Returns product of the polynomials. [other] is interpreted as [Polynomial].
+     */
     override operator fun times(other: Long): UnivariatePolynomial<T> =
         UnivariatePolynomial(
             coefficients
@@ -162,6 +277,7 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
                 .map { it * other }
         )
 
+    // TODO: Docs
     override fun equals(other: Any?): Boolean =
         when {
             this === other -> true
@@ -183,8 +299,12 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
             }
         }
 
+    // TODO: Docs
     override fun hashCode(): Int = javaClass.hashCode()
 
+    /**
+     * Returns polynomial that is got as result of substitution by [arg] instead of the variable.
+     */
     operator fun invoke(arg: T): T =
         coefficients
             .asSequence()
@@ -193,6 +313,9 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
             .map { (index, t) -> multiplyByPower(t, arg, index) }
             .reduce { acc, res -> acc + res }
 
+    /**
+     * Returns polynomial that is got as result of substitution by [arg] instead of the variable.
+     */
     operator fun invoke(arg: UnivariatePolynomial<T>): UnivariatePolynomial<T> =
         if (isZero()) this
         else
@@ -203,14 +326,24 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
                 .map { (index, t) -> multiplyByPower(UnivariatePolynomial(t), arg, index) }
                 .reduce { acc, res -> acc + res }
 
+    /**
+     * Returns polynomial that is got as result of substitution by [arg] instead of the variable.
+     */
     operator fun invoke(arg: UnivariateRationalFunction<T>): UnivariateRationalFunction<T> =
         UnivariateRationalFunction(
             this invokeRFTakeNumerator arg,
             power(arg.denominator, degree)
         )
 
+    /**
+     * Represents the polynomial as a [String]. Consider that monomials are sorted in lexicographic order.
+     */
     override fun toString(): String = toString(variableName)
 
+    /**
+     * Represents the polynomial as a [String] where name of the variable is [withVariableName].
+     * Consider that monomials are sorted in lexicographic order.
+     */
     fun toString(withVariableName: String = variableName): String =
         coefficients
             .asSequence()
@@ -234,9 +367,18 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
             .joinToString(separator = " + ") { it }
             .ifEmpty { "0" }
 
+    /**
+     * Represents the polynomial as a [String] where name of the variable is [withVariableName]
+     * and with brackets around the string if needed (i.e. when there are at least two addends in the representation).
+     * Consider that monomials are sorted in lexicographic order.
+     */
     fun toStringWithBrackets(withVariableName: String = variableName): String =
         with(toString(withVariableName)) { if (coefficients.count { it.isNotZero() } <= 1) this else "($this)" }
 
+    /**
+     * Represents the polynomial as a [String] where name of the variable is [withVariableName].
+     * Consider that monomials are sorted in **reversed** lexicographic order.
+     */
     fun toReversedString(withVariableName: String = variableName): String =
         coefficients
             .asSequence()
@@ -263,14 +405,26 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
             .joinToString(separator = " + ") { it }
             .ifEmpty { "0" }
 
+    /**
+     * Represents the polynomial as a [String] where name of the variable is [withVariableName]
+     * and with brackets around the string if needed (i.e. when there are at least two addends in the representation).
+     * Consider that monomials are sorted in **reversed** lexicographic order.
+     */
     fun toReversedStringWithBrackets(withVariableName: String = variableName): String =
         with(toReversedString(withVariableName)) { if (coefficients.count { it.isNotZero() } == 1) this else "($this)" }
 
+    // TODO: Docs
     fun removeZeros() =
         if (degree > -1) UnivariatePolynomial(coefficients.subList(0, degree + 1)) else getZero()
 
+    /**
+     * Converts the value to [UnivariateRationalFunction].
+     */
     fun toUnivariateRationalFunction() = UnivariateRationalFunction(this)
 
+    /**
+     * Converts the value to [Polynomial].
+     */
     fun toPolynomial() = Polynomial(
         coefficients
             .asSequence()
@@ -281,8 +435,14 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
         toCheckInput = false
     )
 
+    /**
+     * Converts the value to [RationalFunction].
+     */
     fun toRationalFunction() = RationalFunction(toPolynomial())
 
+    /**
+     * Converts the value to [LabeledPolynomial].
+     */
     fun toLabeledPolynomial() = LabeledPolynomial(
         coefficients
             .asSequence()
@@ -293,13 +453,27 @@ class UnivariatePolynomial<T: Ring<T>> (val coefficients: List<T>) /* TODO: Add 
         toCheckInput = false
     )
 
+    /**
+     * Converts the value to [LabeledRationalFunction].
+     */
     fun toLabeledRationalFunction() = LabeledRationalFunction(toLabeledPolynomial())
 
     companion object {
+        /**
+         * Default name of variables used in string representations.
+         *
+         * @see UnivariatePolynomial.toString
+         */
         var variableName = "x"
 
+        /**
+         * Represents internal [UnivariatePolynomial] errors.
+         */
         private class UnivariatePolynomialError(message: String): Error(message)
 
+        /**
+         * Represents result of division with remainder.
+         */
         data class DividingResult<T : Field<T>>(
             val quotient: UnivariatePolynomial<T>,
             val reminder: UnivariatePolynomial<T>

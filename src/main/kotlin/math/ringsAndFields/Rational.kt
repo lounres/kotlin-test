@@ -57,7 +57,7 @@ class Rational: Field<Rational>, Comparable<Rational> {
         if (toCheckInput) {
             if (denominator.isZero()) throw ArithmeticException("/ by zero")
 
-            val greatestCommonDivider = gcd(numerator, denominator) * (if (denominator < 0L) -1L else 1L)
+            val greatestCommonDivider = gcd(numerator, denominator).let { if (denominator < 0L) -it else it }
 
             this.numerator = numerator / greatestCommonDivider
             this.denominator = denominator / greatestCommonDivider
@@ -109,7 +109,7 @@ class Rational: Field<Rational>, Comparable<Rational> {
                 val numerator = result[0].toInteger()
                 val denominator = result[1].toInteger()
 
-                val greatestCommonDivider = gcd(numerator, denominator) * (if (denominator < 0) -1 else 1)
+                val greatestCommonDivider = gcd(numerator, denominator).let { if (denominator < 0) -it else it }
 
                 this.numerator = numerator / greatestCommonDivider
                 this.denominator = denominator / greatestCommonDivider

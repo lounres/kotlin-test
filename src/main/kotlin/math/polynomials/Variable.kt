@@ -1,5 +1,7 @@
 package math.polynomials
 
+import kotlin.reflect.KProperty
+
 
 /**
  * Represents class of labeled variables like usual
@@ -29,4 +31,8 @@ data class Variable (val name: String) : Comparable<Variable> {
      * @return Only name of the variable.
      */
     override fun compareTo(other: Variable): Int = name.compareTo(other.name)
+
+    companion object {
+        operator fun getValue(thisRef: Any?, property: KProperty<*>) : Variable = Variable(property.name)
+    }
 }

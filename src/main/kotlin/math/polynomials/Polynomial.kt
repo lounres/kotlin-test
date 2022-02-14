@@ -8,7 +8,7 @@ import kotlin.math.max
  * Represents multivariate polynomials with indexed variables.
  *
  * @param T Ring in which the polynomial is considered.
- * @param coefs Coefficients of the instants.
+ * @param coefs Coefficients of the instant.
  * @param toCheckInput If it's `true` cleaning of [coefficients] is executed otherwise it is not.
  *
  * @constructor Gets the coefficients in format of [coefficients] field and cleans it: removes zero degrees from end of
@@ -577,7 +577,7 @@ internal constructor(
     override fun hashCode(): Int = javaClass.hashCode() // TODO: Rewrite
 
     /**
-     * Returns polynomial that is got as result of substitution of values of [arg] instead of corresponding keys. All
+     * Returns polynomial that is got as result of substitution by values of [arg] instead of corresponding keys. All
      * variables of the polynomial that is not in [arg] keys are left unsubstituted.
      */
     operator fun invoke(arg: Map<Int, T>): Polynomial<T> =
@@ -590,7 +590,7 @@ internal constructor(
         )
 
     /**
-     * Returns polynomial that is got as result of substitution of values of [arg] instead of corresponding keys. All
+     * Returns polynomial that is got as result of substitution by values of [arg] instead of corresponding keys. All
      * variables of the polynomial that is not in [arg] keys are left unsubstituted.
      */
     @JvmName("invokePolynomial")
@@ -607,7 +607,7 @@ internal constructor(
             .reduce { acc, polynomial -> acc + polynomial } // TODO: Rewrite. Might be slow.
 
     /**
-     * Returns polynomial that is got as result of substitution of values of [arg] instead of corresponding keys. All
+     * Returns polynomial that is got as result of substitution by values of [arg] instead of corresponding keys. All
      * variables of the polynomial that is not in [arg] keys are left unsubstituted.
      */
     @JvmName("invokeRationalFunction")
